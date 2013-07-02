@@ -27,7 +27,7 @@ public:
     bool grab(void);
     int width(void) const { return _width; }
     int height(void) const { return _height; }
-    const std::vector<float>& z(void) const { return _z; }
+    const cv::Mat& z(void) const { return _z; }
     const std::vector<float>& coords(void) const { return _coords; }
     const cv::Mat& image(void) const { return _flags & Color ? _imgRgb : _imgIr; }
     const cv::Mat& ir(void) const { return _imgIr; }
@@ -46,7 +46,7 @@ private:
     Flag _flags;
     int _width;
     int _height;
-    std::vector<float> _z;
+    cv::Mat _z;
     std::vector<float> _coords;
     cv::Mat _imgRgb;
     cv::Mat _imgIr;

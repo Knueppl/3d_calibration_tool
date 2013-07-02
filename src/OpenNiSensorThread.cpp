@@ -67,7 +67,7 @@ void OpenNiSensorThread::grab(void)
     }
 
     _device->image().copyTo(_images[bank]);
-    _zs[bank] = _device->z();
+    _device->z().copyTo(_zs[bank]);
     _mutex.unlock();
 }
 

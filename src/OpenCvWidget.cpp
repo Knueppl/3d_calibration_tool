@@ -36,6 +36,13 @@ void OpenCvWidget::setMat(const cv::Mat& mat)
         QImage img(qImageBuffer, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
         m_image = new QImage(img.rgbSwapped());
     }
+
+    // 16-bits depth image
+    else if (mat.type() == CV_16UC1)
+    {
+        const uchar* qImageBuffer = static_cast<const uchar*>(mat.data);
+        m_image = new QImage(qImageBuffer, mat.cols, mat.rows, mat.step, QImage::Format_RGB16);
+    }
     else
     {
         qDebug() << "ERROR: Mat could not be converted to QImage.";

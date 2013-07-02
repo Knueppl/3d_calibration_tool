@@ -21,7 +21,7 @@ public:
 
     const std::vector<cv::Point3f>* coords(void) const { return &_coords[_bank]; }
     const cv::Mat* image(void) const { return &_images[_bank]; }
-    const std::vector<float>* z(void) const { return &_zs[_bank]; }
+    const cv::Mat* z(void) const { return &_zs[_bank]; }
     void switchBank(void);
 
 protected:
@@ -41,7 +41,7 @@ private:
     OpenNiDevice* _device;
     QVector<std::vector<cv::Point3f> > _coords;
     QVector<cv::Mat> _images;
-    QVector<std::vector<float> > _zs;
+    QVector<cv::Mat> _zs;
     BufferBank _bank;
     QMutex _mutex;
 };

@@ -16,13 +16,13 @@ public:
     void grab(void);
     const std::vector<cv::Point3f>& coords(void) const { return *_coords; }
     const cv::Mat& image(void) const { return *_image; }
-    const std::vector<float>& z(void) const { return *_z; }
+    const cv::Mat& z(void) const { return *_z; }
 
 private:
     OpenNiSensorThread* _device;
     const std::vector<cv::Point3f>* _coords;
     const cv::Mat* _image;
-    const std::vector<float>* _z;
+    const cv::Mat* _z;
 };
 
 #endif

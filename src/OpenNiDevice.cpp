@@ -120,7 +120,7 @@ bool OpenNiDevice::init(void)
         {
             _width = depthWidth;
             _height = depthHeight;
-            _z.resize(_width * _height);
+            _z.create(_height, _width, CV_16UC1);
             _coords.resize(_width * _height * 3);
             _imgRgb.create(_height, _width, CV_8UC3);
             _imgIr.create(_height, _width, CV_8UC1);
@@ -144,7 +144,7 @@ bool OpenNiDevice::init(void)
 
         _width = depthVideoMode.getResolutionX();
         _height = depthVideoMode.getResolutionY();
-        _z.resize(_width * _height);
+        _z.create(_height, _width, CV_16UC1);
         _coords.resize(_width * _height * 3);
         _imgIr.create(_height, _width, CV_8UC1);
 
@@ -160,7 +160,7 @@ bool OpenNiDevice::init(void)
 
         _width = depthVideoMode.getResolutionX();
         _height = depthVideoMode.getResolutionY();
-        _z.resize(_width * _height);
+        _z.create(_height, _width, CV_16UC1);
         _coords.resize(_width * _height * 3);
         _imgRgb.create(_height, _width, CV_8UC3);
 
@@ -199,7 +199,7 @@ bool OpenNiDevice::grab(void)
         _depth.readFrame(&_frameDepth);
 
         const openni::DepthPixel* data = reinterpret_cast<const openni::DepthPixel*>(_frameDepth.getData());
-        std::vector<float>::iterator itZ(_z.begin());
+        uint16_t* itZ = reinterpret_cast<uint16_t*>(_z.data);
         std::vector<float>::iterator itCoords(_coords.begin());
 
         for (int row = 0; row < _height; ++row)
@@ -211,7 +211,7 @@ bool OpenNiDevice::grab(void)
                 float z;
 
                 openni::CoordinateConverter::convertDepthToWorld(_depth, col, row, *data, &x, &y, &z);
-                *itZ = *data * 0.001;
+                *itZ = *data;// * 0.001;
                 *itCoords++ = x * -0.001;
                 *itCoords++ = y *  0.001;
                 *itCoords++ = z *  0.001;

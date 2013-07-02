@@ -49,12 +49,5 @@ void MainWidget::tick(void)
     }
 
     _ui->_cloudWidget->setCloud(cloud);
-
-    cv::Mat z(image.rows, image.cols, CV_8UC1);
-    unsigned char* des = z.data;
-
-    for (std::vector<float>::const_iterator src(_sensor.z().begin()); src < _sensor.z().end(); ++des, ++src)
-             *des = static_cast<unsigned char>((static_cast<unsigned int>(*src * 1000.0) >> 8) & 0xf);
-
-    _depthWidget->setMat(z);
+    _depthWidget->setMat(_sensor.z());
 }
