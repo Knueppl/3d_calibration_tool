@@ -10,6 +10,7 @@ OpenNiSensorThread::OpenNiSensorThread(QObject* parent)
       _device(new OpenNiDevice()),
       _coords(CountBanks),
       _images(CountBanks),
+      _zs(CountBanks),
       _bank(BankA)
 {
     _device->init();
@@ -66,6 +67,7 @@ void OpenNiSensorThread::grab(void)
     }
 
     _device->image().copyTo(_images[bank]);
+    _zs[bank] = _device->z();
     _mutex.unlock();
 }
 

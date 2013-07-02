@@ -212,9 +212,9 @@ bool OpenNiDevice::grab(void)
 
                 openni::CoordinateConverter::convertDepthToWorld(_depth, col, row, *data, &x, &y, &z);
                 *itZ = *data * 0.001;
-                *itCoords++ = x * 0.001;
-                *itCoords++ = y * 0.001;
-                *itCoords++ = z * 0.001;
+                *itCoords++ = x * -0.001;
+                *itCoords++ = y *  0.001;
+                *itCoords++ = z *  0.001;
             }
         }
     }
@@ -246,7 +246,7 @@ bool OpenNiDevice::grab(void)
         for (int i = 0; i < size; ++i, ++src, ++des)
             *des = *src >> 2;
 
-        cv::flip(_imgIr, _imgIr, 1);
+//        cv::flip(_imgIr, _imgIr, 1);
     }
 
     return true;

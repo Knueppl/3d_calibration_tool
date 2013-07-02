@@ -2,6 +2,7 @@
 #define __MAIN_WIDGET__
 
 #include "OpenNiSensor.h"
+#include "OpenCvWidget.h"
 
 #include <QTimer>
 #include <QMainWindow>
@@ -16,6 +17,7 @@ class MainWidget : public QMainWindow
 
 public:
     explicit MainWidget(void);
+    ~MainWidget(void);
 
 private slots:
     void tick(void);
@@ -24,6 +26,7 @@ private:
     Ui::MainWidget* _ui;
     QTimer _timer;
     OpenNiSensor _sensor;
+    OpenCvWidget* _depthWidget;
 };
 
 #endif

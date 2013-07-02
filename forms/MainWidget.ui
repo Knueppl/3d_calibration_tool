@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>539</width>
+    <width>527</width>
     <height>478</height>
    </rect>
   </property>
@@ -15,9 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="OpenCvWidget" name="_cvWidget" native="true"/>
-    </item>
     <item>
      <widget class="CloudWidget" name="_cloudWidget" native="true"/>
     </item>
@@ -28,7 +25,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>539</width>
+     <width>527</width>
      <height>29</height>
     </rect>
    </property>
@@ -36,12 +33,6 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <customwidgets>
-  <customwidget>
-   <class>OpenCvWidget</class>
-   <extends>QWidget</extends>
-   <header>OpenCvWidget.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>CloudWidget</class>
    <extends>QWidget</extends>

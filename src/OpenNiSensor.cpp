@@ -21,4 +21,5 @@ void OpenNiSensor::grab(void)
     _device->switchBank();
     _coords = _device->coords();
     _image = _device->image();
+    _z = _device->z();
 }
