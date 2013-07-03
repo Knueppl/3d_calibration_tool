@@ -12,5 +12,12 @@ int main(int argc, char** argv)
     MainWidget gui;
     gui.show();
 
-    return app.exec();
+    try
+    {
+        return app.exec();
+    }
+    catch (...)
+    {
+
+    }
 }

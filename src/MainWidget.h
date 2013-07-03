@@ -27,6 +27,7 @@ private:
     QTimer _timer;
     OpenNiSensor _sensor;
     OpenCvWidget* _depthWidget;
+    OpenCvWidget* _testWidget;
 };
 
 #endif

@@ -63,6 +63,8 @@ target_link_libraries(3d-calibration-tool
                       ${QT_LIBRARIES}
 #                      ${PCL_LIBRARIES}
                       opencv_core
+                      opencv_imgproc
+                      opencv_highgui
                       ${OPENNI_LIBRARIES}
                       QVTK
                       ${VTK_LIBRARIES}

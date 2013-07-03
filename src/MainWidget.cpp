@@ -3,13 +3,17 @@
 
 #include <QDebug>
 
+#include <algorithm>
+
 MainWidget::MainWidget(void)
     : QMainWindow(0),
       _ui(new Ui::MainWidget),
-      _depthWidget(new OpenCvWidget)
+      _depthWidget(new OpenCvWidget),
+      _testWidget(new OpenCvWidget)
 {
     _ui->setupUi(this);
     _depthWidget->show();
+    _testWidget->show();
 
     this->connect(&_timer, SIGNAL(timeout()), this, SLOT(tick()));
 
@@ -50,4 +54,21 @@ void MainWidget::tick(void)
 
     _ui->_cloudWidget->setCloud(cloud);
     _depthWidget->setMat(_sensor.z());
+
+    cv::Mat z(_sensor.z().rows, _sensor.z().cols, CV_8UC1);
+    std::vector<std::vector<cv::Point> > contours;
+//    const uint16_t max = *std::max_element(z.begin<uint16_t>(), z.end<uint16_t>());
+//    const uint16_t min = *std::min_element(z.begin<uint16_t>(), z.end<uint16_t>());
+    unsigned char* des = z.data;
+    const uint16_t* src = reinterpret_cast<uint16_t*>(_sensor.z().data);
+    const unsigned int size = z.rows * z.cols;
+
+    for (unsigned int i = 0; i < size; i++, des++, src++)
+        *des = static_cast<unsigned char>((*src >> 6) & 0xf);
+
+    cv::Canny(z, z, 30, 90, 5);
+    cv::findContours(z, contours, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE);
+    cv::Scalar color(255, 0, 0);
+    cv::drawContours(z, contours, -1, color, 10);
+    _testWidget->setMat(z);
 }
