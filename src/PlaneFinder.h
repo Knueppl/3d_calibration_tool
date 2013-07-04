@@ -33,6 +33,10 @@ private:
     QWaitCondition _updated;
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr _inputCloud;
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr _planeCloud;
+    float _alpha;
+    float _beta;
+    float _gamma;
+    pcl::PointXYZ _midPoint;
 };
 
 #endif

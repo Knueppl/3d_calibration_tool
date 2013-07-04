@@ -5,12 +5,19 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/extract_indices.h>
 
+#include <cmath>
+
+#include <opencv2/opencv.hpp>
+
 #include <QDebug>
 
 PlaneFinder::PlaneFinder(QObject* parent)
     : QThread(parent),
       _inputCloud(new pcl::PointCloud<pcl::PointXYZRGBL>()),
-      _planeCloud(new pcl::PointCloud<pcl::PointXYZRGBL>())
+      _planeCloud(new pcl::PointCloud<pcl::PointXYZRGBL>()),
+      _alpha(0.0),
+      _beta(0.0),
+      _gamma(0.0)
 {
     this->start();
 }
@@ -33,9 +40,9 @@ void PlaneFinder::run(void)
 
 void PlaneFinder::setInputCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud)
 {
-//    _mutex.lock();
     if (!_mutex.tryLock())
         return;
+
     _inputCloud->clear();
     *_inputCloud += *cloud;
     _updated.wakeAll();
@@ -71,13 +78,17 @@ void PlaneFinder::search(void)
         return;
     }
 
+    const float normalAbs = std::sqrt(std::pow(coefficients->values[0], 2) + std::pow(coefficients->values[1], 2) + std::pow(coefficients->values[2], 2));
+    _alpha = std::acos(coefficients->values[0] / normalAbs) / M_PI * 180.0;
+    _beta = std::acos(coefficients->values[1] / normalAbs) / M_PI * 180.0;
+    _gamma = std::acos(coefficients->values[2] / normalAbs) / M_PI * 180.0;
+
     /* check model cooefficients */
-//    qDebug() << "model coefficients:";
-//    qDebug() << "----------------------------------";
-//    qDebug() << "a = " << coefficients->values[0];
-//    qDebug() << "b = " << coefficients->values[1];
-//    qDebug() << "c = " << coefficients->values[2];
-//    qDebug() << "d = " << coefficients->values[3];
+    qDebug() << "model coefficients:";
+    qDebug() << "----------------------------------";
+    qDebug() << "alpha = " << _alpha;
+    qDebug() << "beta  = " << _beta;
+    qDebug() << "gamma = " << _gamma;
 
     pcl::ExtractIndices<pcl::PointXYZRGBL> extract;
 
@@ -85,6 +96,38 @@ void PlaneFinder::search(void)
     extract.setIndices(inliers);
     extract.setNegative(false);
     extract.filter(*_planeCloud);
+
+    const float factor = 1.0 / static_cast<float>(_planeCloud->size());
+    _midPoint = pcl::PointXYZ(0.0, 0.0, 0.0);
+
+    for (pcl::PointCloud<pcl::PointXYZRGBL>::const_iterator point(_planeCloud->begin()); point < _planeCloud->end(); ++point)
+    {
+        _midPoint.x += point->x * factor;
+        _midPoint.y += point->y * factor;
+        _midPoint.z += point->z * factor;
+    }
+
+    qDebug() << "mid point = (" << _midPoint.x << ", " << _midPoint.y << ", " << _midPoint.z << ")";
+
+    cv::Mat coords(1, _planeCloud->size(), CV_32FC3);
+    float* dataCoords = coords.data;
+    for (pcl::PointCloud<pcl::XYZRGBL>::const_iterator point(_planeCloud->begin()); point < _planeCloud->end(); ++point)
+    {
+        *dataCoords++ = point->x - _midPoint.x;
+        *dataCoords++ = point->y - _midPoint.y;
+        *dataCoords++ = point->z - _midPoint.z;
+    }
+    cv::Mat distance(1, _planeCloud->size(), CV_32FC1);
+    cv::pow(coords, 2.0, coords);
+    float* dataDistance = distance.data;
+    dataCoords = coords.data;
+    for (unsigned int i = 0; i < _planeCloud->size(); i++, dataDistance++)
+    {
+        *dataDistance  = *dataCoords++;
+        *dataDistance += *dataCoords++;
+        *dataDistance += *dataCoords++;
+    }
+    cv::sqrt(distance, distance);
 
     emit this->foundPlane(_planeCloud);
 }

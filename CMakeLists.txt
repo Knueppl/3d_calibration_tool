@@ -16,6 +16,9 @@ add_definitions(${QT_DEFINITIONS}
                 ${PCL_DEFINITIONS}
                 )
 
+# its from pcl website
+add_definitions(-Wall -O2 -ffast-math -funroll-loops -ftree-vectorize -fomit-frame-pointer -pipe -mfpmath=sse -mmmx -msse -mtune=core2 -march=core2 -msse2 -msse3 -mssse3 -msse4)
+
 set(MOC_HEADERS
     ${SRC_DIR}/OpenCvWidget.h
     ${SRC_DIR}/OpenNiSensorThread.h
@@ -38,8 +41,6 @@ include_directories(${PROJECT_SOURCE_DIR}/build
                     ${VTK_INCLUDE_DIRS}
                     ${SRC_DIR}
                     ${OpenCV_INCLUDE_DIRS}
-#                    /usr/local/include/pcl-1.7/
-#                    /usr/include/eigen3
                     ${PCL_INCLUDE_DIRS}
                     )
 
@@ -66,13 +67,6 @@ add_executable(3d-calibration-tool
 target_link_libraries(3d-calibration-tool
                       ${OPENNI_LIBRARIES}
                       ${QT_LIBRARIES}
-#                      pcl_sample_consensus
-#                      pcl_segmentation
-#                      pcl_filters
-#                      pcl_features
-#                      pcl_common
-#                      pcl_search
-#                      pcl_kdtree
                       ${PCL_LIBRARIES}
                       ${OpenCV_LIBS}
                       QVTK

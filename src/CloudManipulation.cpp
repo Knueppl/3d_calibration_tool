@@ -68,6 +68,8 @@ void CloudManipulation::generateCloud(void)
 
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZRGBL>());
     cloud->resize(_coords->size());
+    cloud->width = _image->cols;
+    cloud->height = _image->rows;
     std::vector<cv::Point3f>::const_iterator coord(_coords->begin());
     pcl::PointCloud<pcl::PointXYZRGBL>::iterator point(cloud->begin());
     const unsigned char* pixel = _image->data;
