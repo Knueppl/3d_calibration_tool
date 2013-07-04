@@ -103,6 +103,37 @@ void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cloud)
     this->update();
 }
 
+void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+{
+    m_polyData->Reset();
+    m_points->Reset();
+    m_colors->Reset();
+    m_colors->SetNumberOfComponents(3);
+
+    for (pcl::PointCloud<pcl::PointXYZRGB>::const_iterator point(cloud->begin()); point < cloud->end(); ++point)
+    {
+        unsigned char temp[3];
+
+        m_points->InsertNextPoint(point->x, point->y, point->z);
+        temp[0] = point->r;
+        temp[1] = point->g;
+        temp[2] = point->b;
+        m_colors->InsertNextTupleValue(temp);
+    }
+
+    m_polyData->GetPointData()->SetNormals(NULL);
+    m_polyData->SetPoints(m_points);
+
+    vtkSmartPointer<vtkVertexGlyphFilter> glyphFilter =  vtkSmartPointer<vtkVertexGlyphFilter>::New();
+    glyphFilter->SetInputConnection(m_polyData->GetProducerPort());
+    glyphFilter->Update();
+
+    m_polyData->ShallowCopy(glyphFilter->GetOutput());
+    m_polyData->GetPointData()->SetScalars(m_colors);
+    m_points->Modified();
+    this->update();
+}
+
 void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
 {
     m_polyData->Reset();

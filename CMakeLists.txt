@@ -4,15 +4,16 @@ include(FindPkgConfig)
 set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set(FORM_DIR ${PROJECT_SOURCE_DIR}/forms)
 
-#find_package(PCL 1.7 REQUIRED)
+find_package(PCL 1.7 REQUIRED)
 pkg_check_modules(OPENNI libopenni2)
 find_package(Qt4 REQUIRED)
 find_package(VTK REQUIRED)
+find_package(OpenCV REQUIRED)
 
 include(${QT_USE_FILE})
 
 add_definitions(${QT_DEFINITIONS}
-#                ${PCL_DEFINITIONS}
+                ${PCL_DEFINITIONS}
                 )
 
 set(MOC_HEADERS
@@ -34,16 +35,15 @@ include_directories(${PROJECT_SOURCE_DIR}/build
                     ${OPENNI_INCLUDE_DIRS}
                     ${VTK_INCLUDE_DIRS}
                     ${SRC_DIR}
-                    /usr/local/include/pcl-1.7/
-                    /usr/include/eigen3
-#                    ${PCL_INCLUDE_DIRS}
+                    ${OpenCV_INCLUDE_DIRS}
+#                    /usr/local/include/pcl-1.7/
+#                    /usr/include/eigen3
+                    ${PCL_INCLUDE_DIRS}
                     )
 
-#message(STATUS "Paths:")
-#message(STATUS ${PCL_INCLUDE_DIRS})
-
 link_directories(${OPENNI_LIBRARY_DIRS}
-#                 ${PCL_LIBRARY_DIRS}
+                 ${OpenCV_LIBRARY_DIRS}
+                 ${PCL_LIBRARY_DIRS}
                  )
 
 
@@ -60,12 +60,17 @@ add_executable(3d-calibration-tool
                )
 
 target_link_libraries(3d-calibration-tool
-                      ${QT_LIBRARIES}
-#                      ${PCL_LIBRARIES}
-                      opencv_core
-                      opencv_imgproc
-                      opencv_highgui
                       ${OPENNI_LIBRARIES}
+                      ${QT_LIBRARIES}
+#                      pcl_sample_consensus
+#                      pcl_segmentation
+#                      pcl_filters
+#                      pcl_features
+#                      pcl_common
+#                      pcl_search
+#                      pcl_kdtree
+                      ${PCL_LIBRARIES}
+                      ${OpenCV_LIBS}
                       QVTK
                       ${VTK_LIBRARIES}
                       )

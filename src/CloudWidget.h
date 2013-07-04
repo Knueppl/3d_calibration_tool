@@ -22,6 +22,7 @@ public:
 
 public slots:
     void setCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
+    void setCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
     void setCloud(pcl::PointCloud<pcl::PointXYZRGBL>* cloud);
     void setCloud(pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cloud);
 

@@ -1,7 +1,7 @@
 #ifndef __OPEN_NI_DEVICE__
 #define __OPEN_NI_DEVICE__
 
-#include <OpenNI.h>
+#include <openni2/OpenNI.h>
 #include <opencv2/opencv.hpp>
 
 #include <string>
