@@ -22,7 +22,7 @@ CloudWidget::CloudWidget(QWidget* parent)
       m_colors(vtkSmartPointer<vtkUnsignedCharArray>::New())
 {
     m_renderer->SetBackground(.0, .0, .0);
-    m_renderer->GetActiveCamera()->Yaw(180);
+    m_renderer->GetActiveCamera()->Yaw(0);
     this->GetRenderWindow()->AddRenderer(m_renderer);
 
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
@@ -41,21 +41,21 @@ CloudWidget::~CloudWidget(void)
     // Maybe i should delete m_polyData, m_points, ...
 }
 
-void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGBL>* cloud)
+void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud)
 {
     m_polyData->Reset();
     m_points->Reset();
     m_colors->Reset();
     m_colors->SetNumberOfComponents(3);
 
-    for (pcl::PointCloud<pcl::PointXYZRGBL>::iterator it = cloud->begin(); it < cloud->end(); ++it)
+    for (pcl::PointCloud<pcl::PointXYZRGBL>::const_iterator point = cloud->begin(); point < cloud->end(); ++point)
     {
         unsigned char temp[3];
 
-        m_points->InsertNextPoint((*it).x, (*it).y, -(*it).z);
-        temp[0] = it->r;
-        temp[1] = it->g;
-        temp[2] = it->b;
+        m_points->InsertNextPoint(point->x, point->y, point->z);
+        temp[0] = point->r;
+        temp[1] = point->g;
+        temp[2] = point->b;
         m_colors->InsertNextTupleValue(temp);
     }
 
@@ -72,38 +72,7 @@ void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGBL>* cloud)
     this->update();
 }
 
-void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cloud)
-{
-    m_polyData->Reset();
-    m_points->Reset();
-    m_colors->Reset();
-    m_colors->SetNumberOfComponents(3);
-
-    for (pcl::PointCloud<pcl::PointXYZRGBL>::iterator it = cloud->begin(); it < cloud->end(); ++it)
-    {
-        unsigned char temp[3];
-
-        m_points->InsertNextPoint((*it).x, (*it).y, -(*it).z);
-        temp[0] = it->r;
-        temp[1] = it->g;
-        temp[2] = it->b;
-        m_colors->InsertNextTupleValue(temp);
-    }
-
-    m_polyData->GetPointData()->SetNormals(NULL);
-    m_polyData->SetPoints(m_points);
-
-    vtkSmartPointer<vtkVertexGlyphFilter> glyphFilter =  vtkSmartPointer<vtkVertexGlyphFilter>::New();
-    glyphFilter->SetInputConnection(m_polyData->GetProducerPort());
-    glyphFilter->Update();
-
-    m_polyData->ShallowCopy(glyphFilter->GetOutput());
-    m_polyData->GetPointData()->SetScalars(m_colors);
-    m_points->Modified();
-    this->update();
-}
-
-void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
+void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud)
 {
     m_polyData->Reset();
     m_points->Reset();
@@ -134,7 +103,7 @@ void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud)
     this->update();
 }
 
-void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
+void CloudWidget::setCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud)
 {
     m_polyData->Reset();
     m_points->Reset();

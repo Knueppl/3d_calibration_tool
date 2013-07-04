@@ -21,6 +21,8 @@ set(MOC_HEADERS
     ${SRC_DIR}/OpenNiSensorThread.h
     ${SRC_DIR}/MainWidget.h
     ${SRC_DIR}/CloudWidget.h
+    ${SRC_DIR}/CloudManipulation.h
+    ${SRC_DIR}/PlaneFinder.h
     )
 
 set(FORMS
@@ -55,6 +57,8 @@ add_executable(3d-calibration-tool
                ${SRC_DIR}/OpenNiSensorThread.cpp
                ${SRC_DIR}/MainWidget.cpp
                ${SRC_DIR}/CloudWidget.cpp
+               ${SRC_DIR}/CloudManipulation.cpp
+               ${SRC_DIR}/PlaneFinder.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
                )

@@ -21,10 +21,9 @@ public:
     ~CloudWidget(void);
 
 public slots:
-    void setCloud(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud);
-    void setCloud(pcl::PointCloud<pcl::PointXYZRGB>::Ptr cloud);
-    void setCloud(pcl::PointCloud<pcl::PointXYZRGBL>* cloud);
-    void setCloud(pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cloud);
+    void setCloud(pcl::PointCloud<pcl::PointXYZ>::ConstPtr cloud);
+    void setCloud(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud);
+    void setCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
 
 private:
     vtkSmartPointer<vtkRenderer>          m_renderer;

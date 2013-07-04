@@ -1,11 +1,13 @@
 #ifndef __MAIN_WIDGET__
 #define __MAIN_WIDGET__
 
-#include "OpenNiSensor.h"
-#include "OpenCvWidget.h"
+#include "CloudManipulation.h"
+#include "PlaneFinder.h"
 
 #include <QTimer>
 #include <QMainWindow>
+#include <QColor>
+
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/PointIndices.h>
@@ -26,15 +28,13 @@ private slots:
     void tick(void);
 
 private:
-    void computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::Ptr& cloud, pcl::PointCloud<pcl::Normal>::Ptr& normals);
     void regionGrowing(pcl::PointCloud<pcl::PointXYZRGBL>::Ptr& cloud, pcl::PointCloud<pcl::Normal>::Ptr& normals,
                        std::vector<pcl::PointIndices>& clusters);
 
     Ui::MainWidget* _ui;
     QTimer _timer;
-    OpenNiSensor _sensor;
-    OpenCvWidget* _depthWidget;
-    OpenCvWidget* _testWidget;
+    CloudManipulation _cloudManipulation;
+    PlaneFinder _planeFinder;
 };
 
 #endif
