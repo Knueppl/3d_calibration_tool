@@ -1,4 +1,5 @@
 #include "PlaneFinder.h"
+#include "ConfigDialog.h"
 
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/ModelCoefficients.h>
@@ -17,14 +18,16 @@ PlaneFinder::PlaneFinder(QObject* parent)
       _planeCloud(new pcl::PointCloud<pcl::PointXYZRGBL>()),
       _alpha(0.0),
       _beta(0.0),
-      _gamma(0.0)
+      _gamma(0.0),
+      _dialog(new ConfigDialog)
 {
     this->start();
+    _dialog->show();
 }
 
 PlaneFinder::~PlaneFinder(void)
 {
-
+    delete _dialog;
 }
 
 void PlaneFinder::run(void)
@@ -110,8 +113,8 @@ void PlaneFinder::search(void)
     qDebug() << "mid point = (" << _midPoint.x << ", " << _midPoint.y << ", " << _midPoint.z << ")";
 
     cv::Mat coords(1, _planeCloud->size(), CV_32FC3);
-    float* dataCoords = coords.data;
-    for (pcl::PointCloud<pcl::XYZRGBL>::const_iterator point(_planeCloud->begin()); point < _planeCloud->end(); ++point)
+    float* dataCoords = reinterpret_cast<float*>(coords.data);
+    for (pcl::PointCloud<pcl::PointXYZRGBL>::const_iterator point(_planeCloud->begin()); point < _planeCloud->end(); ++point)
     {
         *dataCoords++ = point->x - _midPoint.x;
         *dataCoords++ = point->y - _midPoint.y;
@@ -119,8 +122,8 @@ void PlaneFinder::search(void)
     }
     cv::Mat distance(1, _planeCloud->size(), CV_32FC1);
     cv::pow(coords, 2.0, coords);
-    float* dataDistance = distance.data;
-    dataCoords = coords.data;
+    float* dataDistance = reinterpret_cast<float*>(distance.data);
+    dataCoords = reinterpret_cast<float*>(coords.data);
     for (unsigned int i = 0; i < _planeCloud->size(); i++, dataDistance++)
     {
         *dataDistance  = *dataCoords++;
@@ -128,6 +131,10 @@ void PlaneFinder::search(void)
         *dataDistance += *dataCoords++;
     }
     cv::sqrt(distance, distance);
+
+//    dataDistance = reinterpret_cast<float*>(distance.data);
+//    for (unsigned int i = 0; i < distance.cols; i++, dataDistance++)
+//        if (*dataDistance < 
 
     emit this->foundPlane(_planeCloud);
 }

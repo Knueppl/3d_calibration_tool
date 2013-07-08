@@ -8,6 +8,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+class ConfigDialog;
+
 class PlaneFinder : public QThread
 {
     Q_OBJECT
@@ -37,6 +39,7 @@ private:
     float _beta;
     float _gamma;
     pcl::PointXYZ _midPoint;
+    ConfigDialog* _dialog;
 };
 
 #endif

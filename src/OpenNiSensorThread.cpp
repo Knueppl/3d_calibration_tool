@@ -15,7 +15,7 @@ OpenNiSensorThread::OpenNiSensorThread(QObject* parent)
 {
     _device->init();
 
-    for (unsigned int i = 0; i < _coords.size(); i++)
+    for (int i = 0; i < _coords.size(); i++)
         _coords[i].resize(_device->width() * _device->height());
 }
 

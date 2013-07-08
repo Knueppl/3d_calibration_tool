@@ -26,10 +26,12 @@ set(MOC_HEADERS
     ${SRC_DIR}/CloudWidget.h
     ${SRC_DIR}/CloudManipulation.h
     ${SRC_DIR}/PlaneFinder.h
+    ${SRC_DIR}/ConfigDialog.h
     )
 
 set(FORMS
     ${FORM_DIR}/MainWidget.ui
+    ${FORM_DIR}/ConfigDialog.ui
     )
 
 QT4_WRAP_CPP(HEADERS_MOC ${MOC_HEADERS})
@@ -60,6 +62,7 @@ add_executable(3d-calibration-tool
                ${SRC_DIR}/CloudWidget.cpp
                ${SRC_DIR}/CloudManipulation.cpp
                ${SRC_DIR}/PlaneFinder.cpp
+               ${SRC_DIR}/ConfigDialog.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
                )
