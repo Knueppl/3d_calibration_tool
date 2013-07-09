@@ -82,16 +82,22 @@ void PlaneFinder::search(void)
     }
 
     const float normalAbs = std::sqrt(std::pow(coefficients->values[0], 2) + std::pow(coefficients->values[1], 2) + std::pow(coefficients->values[2], 2));
-    _alpha = std::acos(coefficients->values[0] / normalAbs) / M_PI * 180.0;
-    _beta = std::acos(coefficients->values[1] / normalAbs) / M_PI * 180.0;
-    _gamma = std::acos(coefficients->values[2] / normalAbs) / M_PI * 180.0;
+    _alpha = std::acos(coefficients->values[0] / normalAbs);
+    _beta = std::acos(coefficients->values[1] / normalAbs);
+    _gamma = std::acos(coefficients->values[2] / normalAbs);
+    cv::Mat rot(1, 3, CV_32FC1);
+    rot.at<float>(0, 0) = coefficients->values[0];
+    rot.at<float>(0, 1) = coefficients->values[1];
+    rot.at<float>(0, 2) = coefficients->values[2];
+    cv::Mat R(3, 3, CV_32FC1);
+    cv::Rodrigues(rot, R);
 
     /* check model cooefficients */
     qDebug() << "model coefficients:";
     qDebug() << "----------------------------------";
-    qDebug() << "alpha = " << _alpha;
-    qDebug() << "beta  = " << _beta;
-    qDebug() << "gamma = " << _gamma;
+    qDebug() << "alpha = " << _alpha / M_PI * 180.0;
+    qDebug() << "beta  = " << _beta / M_PI * 180.0;
+    qDebug() << "gamma = " << _gamma / M_PI * 180.0;
 
     pcl::ExtractIndices<pcl::PointXYZRGBL> extract;
 
@@ -132,11 +138,41 @@ void PlaneFinder::search(void)
     }
     cv::sqrt(distance, distance);
 
-//    dataDistance = reinterpret_cast<float*>(distance.data);
-//    for (unsigned int i = 0; i < distance.cols; i++, dataDistance++)
-//        if (*dataDistance < 
+    dataDistance = reinterpret_cast<float*>(distance.data);
+    const float w_2 = _dialog->boardWidth() * 0.5;
+    const float h_2 = _dialog->boardHeight() * 0.5;
+    const float r = std::sqrt(w_2 * w_2 + h_2 * h_2);
+    const float threshold = r * 0.1;
 
-    emit this->foundPlane(_planeCloud);
+    inliers->indices.clear();
+
+    for (int i = 0; i < distance.cols; i++, dataDistance++)
+        if (std::abs(*dataDistance - r) < threshold)
+            inliers->indices.push_back(i);
+
+    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cornerCloud(new pcl::PointCloud<pcl::PointXYZRGBL>());
+
+    extract.setInputCloud(_planeCloud);
+    extract.setIndices(inliers);
+    extract.setNegative(false);
+    extract.filter(*cornerCloud);
+
+    cv::Mat p(1, 3, CV_32FC1);
+
+    for (pcl::PointCloud<pcl::PointXYZRGBL>::iterator point(cornerCloud->begin()); point < cornerCloud->end(); ++point)
+    {
+        p.at<float>(0, 0) = point->x;
+        p.at<float>(0, 1) = point->y;
+        p.at<float>(0, 2) = point->z;
+
+        p = p * R;
+
+        point->x = p.at<float>(0, 0);
+        point->y = p.at<float>(1, 0);
+        point->z = p.at<float>(2, 0);
+    }
+
+    emit this->foundPlane(cornerCloud);
 }
 
 void PlaneFinder::computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals)
