@@ -157,21 +157,6 @@ void PlaneFinder::search(void)
     extract.setNegative(false);
     extract.filter(*cornerCloud);
 
-    cv::Mat p(1, 3, CV_32FC1);
-
-    for (pcl::PointCloud<pcl::PointXYZRGBL>::iterator point(cornerCloud->begin()); point < cornerCloud->end(); ++point)
-    {
-        p.at<float>(0, 0) = point->x;
-        p.at<float>(0, 1) = point->y;
-        p.at<float>(0, 2) = point->z;
-
-        p = p * R;
-
-        point->x = p.at<float>(0, 0);
-        point->y = p.at<float>(1, 0);
-        point->z = p.at<float>(2, 0);
-    }
-
     emit this->foundPlane(cornerCloud);
 }
 
