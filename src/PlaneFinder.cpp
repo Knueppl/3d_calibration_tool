@@ -5,10 +5,10 @@
 #include <pcl/ModelCoefficients.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/extract_indices.h>
+#include <pcl/common/pca.h>
 
 #include <cmath>
-
-#include <opencv2/opencv.hpp>
+#include <iostream>
 
 #include <QDebug>
 
@@ -19,6 +19,7 @@ PlaneFinder::PlaneFinder(QObject* parent)
       _alpha(0.0),
       _beta(0.0),
       _gamma(0.0),
+      _midPoint(1, 1, CV_32FC3),
       _dialog(new ConfigDialog)
 {
     this->start();
@@ -85,12 +86,6 @@ void PlaneFinder::search(void)
     _alpha = std::acos(coefficients->values[0] / normalAbs);
     _beta = std::acos(coefficients->values[1] / normalAbs);
     _gamma = std::acos(coefficients->values[2] / normalAbs);
-    cv::Mat rot(1, 3, CV_32FC1);
-    rot.at<float>(0, 0) = coefficients->values[0];
-    rot.at<float>(0, 1) = coefficients->values[1];
-    rot.at<float>(0, 2) = coefficients->values[2];
-    cv::Mat R(3, 3, CV_32FC1);
-    cv::Rodrigues(rot, R);
 
     /* check model cooefficients */
     qDebug() << "model coefficients:";
@@ -106,58 +101,19 @@ void PlaneFinder::search(void)
     extract.setNegative(false);
     extract.filter(*_planeCloud);
 
-    const float factor = 1.0 / static_cast<float>(_planeCloud->size());
-    _midPoint = pcl::PointXYZ(0.0, 0.0, 0.0);
 
-    for (pcl::PointCloud<pcl::PointXYZRGBL>::const_iterator point(_planeCloud->begin()); point < _planeCloud->end(); ++point)
-    {
-        _midPoint.x += point->x * factor;
-        _midPoint.y += point->y * factor;
-        _midPoint.z += point->z * factor;
-    }
 
-    qDebug() << "mid point = (" << _midPoint.x << ", " << _midPoint.y << ", " << _midPoint.z << ")";
+    pcl::PCA<pcl::PointXYZRGBL> pca(true);
+    pca.setInputCloud(_planeCloud);
+    Eigen::Matrix3f& eigenvectors = pca.getEigenVectors();
+    Eigen::Vector3f& eigenvalues = pca.getEigenValues();
+    Eigen::Vector4f& mean = pca.getMean();
 
-    cv::Mat coords(1, _planeCloud->size(), CV_32FC3);
-    float* dataCoords = reinterpret_cast<float*>(coords.data);
-    for (pcl::PointCloud<pcl::PointXYZRGBL>::const_iterator point(_planeCloud->begin()); point < _planeCloud->end(); ++point)
-    {
-        *dataCoords++ = point->x - _midPoint.x;
-        *dataCoords++ = point->y - _midPoint.y;
-        *dataCoords++ = point->z - _midPoint.z;
-    }
-    cv::Mat distance(1, _planeCloud->size(), CV_32FC1);
-    cv::pow(coords, 2.0, coords);
-    float* dataDistance = reinterpret_cast<float*>(distance.data);
-    dataCoords = reinterpret_cast<float*>(coords.data);
-    for (unsigned int i = 0; i < _planeCloud->size(); i++, dataDistance++)
-    {
-        *dataDistance  = *dataCoords++;
-        *dataDistance += *dataCoords++;
-        *dataDistance += *dataCoords++;
-    }
-    cv::sqrt(distance, distance);
+    std::cout << "eigenvectors:" << std::endl << eigenvectors << std::endl;
+    std::cout << "eigenvalues :" << std::endl << eigenvalues << std::endl;
+    std::cout << "mean : " << std::endl << mean << std::endl;
 
-    dataDistance = reinterpret_cast<float*>(distance.data);
-    const float w_2 = _dialog->boardWidth() * 0.5;
-    const float h_2 = _dialog->boardHeight() * 0.5;
-    const float r = std::sqrt(w_2 * w_2 + h_2 * h_2);
-    const float threshold = r * 0.1;
-
-    inliers->indices.clear();
-
-    for (int i = 0; i < distance.cols; i++, dataDistance++)
-        if (std::abs(*dataDistance - r) < threshold)
-            inliers->indices.push_back(i);
-
-    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cornerCloud(new pcl::PointCloud<pcl::PointXYZRGBL>());
-
-    extract.setInputCloud(_planeCloud);
-    extract.setIndices(inliers);
-    extract.setNegative(false);
-    extract.filter(*cornerCloud);
-
-    emit this->foundPlane(cornerCloud);
+    emit this->foundPlane(_planeCloud);
 }
 
 void PlaneFinder::computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals)
@@ -169,4 +125,17 @@ void PlaneFinder::computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cl
     ne.setInputCloud(cloud);
     ne.setKSearch(10);
     ne.compute(*normals);
+}
+
+void PlaneFinder::copyCloudToMat(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, cv::Mat& mat)
+{
+    mat.create(1, cloud->size(), CV_32FC3);
+    float* dataMat = reinterpret_cast<float*>(mat.data);
+
+    for (pcl::PointCloud<pcl::PointXYZRGBL>::const_iterator point(cloud->begin()); point < cloud->end(); ++point)
+    {
+        *dataMat++ = point->x;
+        *dataMat++ = point->y;
+        *dataMat++ = point->z;
+    }
 }

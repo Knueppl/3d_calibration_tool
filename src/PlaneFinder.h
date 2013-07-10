@@ -8,6 +8,8 @@
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
+#include <opencv2/opencv.hpp>
+
 class ConfigDialog;
 
 class PlaneFinder : public QThread
@@ -30,6 +32,7 @@ protected:
 private:
     void search(void);
     void computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals);
+    void copyCloudToMat(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, cv::Mat& mat);
 
     QMutex _mutex;
     QWaitCondition _updated;
@@ -38,7 +41,7 @@ private:
     float _alpha;
     float _beta;
     float _gamma;
-    pcl::PointXYZ _midPoint;
+    cv::Mat _midPoint;
     ConfigDialog* _dialog;
 };
 

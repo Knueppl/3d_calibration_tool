@@ -27,7 +27,7 @@ set(MOC_HEADERS
     ${SRC_DIR}/CloudManipulation.h
     ${SRC_DIR}/PlaneFinder.h
     ${SRC_DIR}/ConfigDialog.h
-    ${SRC_DIR}/ThermoCamThread.h
+#    ${SRC_DIR}/ThermoCamThread.h
     )
 
 set(FORMS
@@ -50,8 +50,8 @@ include_directories(${PROJECT_SOURCE_DIR}/build
 link_directories(${OPENNI_LIBRARY_DIRS}
                  ${OpenCV_LIBRARY_DIRS}
                  ${PCL_LIBRARY_DIRS}
-                 ${PROJECT_SOURCE_DIR}/lib/i386
-                 ${PROJECT_SOURCE_DIR}/lib/x86_64
+#                 ${PROJECT_SOURCE_DIR}/lib/i386
+#                 ${PROJECT_SOURCE_DIR}/lib/x86_64
                  )
 
 
@@ -66,8 +66,8 @@ add_executable(3d-calibration-tool
                ${SRC_DIR}/CloudManipulation.cpp
                ${SRC_DIR}/PlaneFinder.cpp
                ${SRC_DIR}/ConfigDialog.cpp
-               ${SRC_DIR}/ThermoCamThread.cpp
-               ${SRC_DIR}/ThermoCam.cpp
+#               ${SRC_DIR}/ThermoCamThread.cpp
+#               ${SRC_DIR}/ThermoCam.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
                )
@@ -79,7 +79,7 @@ target_link_libraries(3d-calibration-tool
                       ${OpenCV_LIBS}
                       QVTK
                       ${VTK_LIBRARIES}
-                      PIImager
-                      ImageProcessing
-                      udev
+#                      PIImager
+#                      ImageProcessing
+#                      udev
                       )
