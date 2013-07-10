@@ -11,9 +11,10 @@ unsigned char*        _bufferShow = 0;
 unsigned short*       _bufferT    = 0;
 optris::ImageBuilder* _iBuilder   = 0;
 
-void callbackImager(unsigned short* image, unsigned int, unsigned int)
+void callbackImager(unsigned short* image, unsigned int w, unsigned int h)
 {
-    _iBuilder->convertTemperatureToPaletteImage(image, _bufferShow);
+    _iBuilder->setData(w, h, image);
+    _iBuilder->convertTemperatureToPaletteImage(_bufferShow);
 }
 }
 
@@ -31,7 +32,7 @@ ThermoCamThread::ThermoCamThread(const QByteArray& configFile, QObject* parent)
 
     delete _iBuilder;
     _iBuilder = new optris::ImageBuilder;
-    _iBuilder->setSize(_imager->getWidth(), _imager->getHeight());
+//    _iBuilder->setSize(_imager->getWidth(), _imager->getHeight());
     delete _bufferT;
     _bufferT = new unsigned short[_imager->getWidth(), _imager->getHeight()];
 
