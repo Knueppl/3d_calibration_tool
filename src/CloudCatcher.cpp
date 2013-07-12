@@ -1,20 +1,15 @@
-#include "CloudManipulation.h"
+#include "CloudCatcher.h"
 #include "OpenNiSensor.h"
 
 #include <QDebug>
 
-#include <pcl/filters/extract_indices.h>
-#include <pcl/filters/passthrough.h>
 #include <pcl/segmentation/sac_segmentation.h>
 #include <pcl/ModelCoefficients.h>
 #include <pcl/features/normal_3d.h>
 #include <pcl/segmentation/region_growing.h>
 
-CloudManipulation::CloudManipulation(QObject* parent)
+CloudCatcher::CloudCatcher(QObject* parent)
     : QThread(parent),
-      _cloud(new pcl::PointCloud<pcl::PointXYZRGBL>()),
-      _cloudGreen(new pcl::PointCloud<pcl::PointXYZRGBL>()),
-      _cloudRed(new pcl::PointCloud<pcl::PointXYZRGBL>()),
       _coords(0),
       _z(0),
       _image(0),
@@ -23,12 +18,12 @@ CloudManipulation::CloudManipulation(QObject* parent)
     this->start();
 }
 
-CloudManipulation::~CloudManipulation(void)
+CloudCatcher::~CloudCatcher(void)
 {
     delete _sensor;
 }
 
-void CloudManipulation::trigger(void)
+void CloudCatcher::trigger(void)
 {
     _mutex.lock();
     _sensor->grab();
@@ -39,7 +34,7 @@ void CloudManipulation::trigger(void)
     _mutex.unlock();
 }
 
-void CloudManipulation::run(void)
+void CloudCatcher::run(void)
 {
     while (1)
     {
@@ -50,7 +45,15 @@ void CloudManipulation::run(void)
     }
 }
 
-void CloudManipulation::generateCloud(void)
+void CloudCatcher::setOperationRange(const float min, const float max)
+{
+    _mutex.lock();
+    _minDistance = min;
+    _maxDistance = max;
+    _mutex.unlock();
+}
+
+void CloudCatcher::generateCloud(void)
 {
     if (!_coords || !_z || !_image)
         return;
@@ -89,39 +92,34 @@ void CloudManipulation::generateCloud(void)
     }
 
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr filtered(new pcl::PointCloud<pcl::PointXYZRGBL>());
-    pcl::ExtractIndices<pcl::PointXYZRGBL> extract;
 
-    extract.setInputCloud(cloud);
-    extract.setIndices(indices);
-    extract.setNegative(false);
-    extract.filter(*filtered);
+    _extract.setInputCloud(cloud);
+    _extract.setIndices(indices);
+    _extract.setNegative(false);
+    _extract.filter(*filtered);
+    cloud->swap(*filtered);
 
-    pcl::PassThrough<pcl::PointXYZRGBL> filter;
+    _filter.setInputCloud(cloud);
+    _filter.setFilterFieldName("z");
+    _filter.setFilterLimits(_minDistance, _maxDistance);
+    _filter.filter(*filtered);
+    emit this->catchedCloud(filtered);
 
-    _cloudRed->clear();
-    filter.setInputCloud(filtered);
-    filter.setFilterFieldName("z");
-    filter.setFilterLimits(0.0, 0.5);
-    filter.filter(*_cloudRed);
-    filter.setFilterLimits(1.0, 3.5);
-    filter.filter(*_cloudRed);
+    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr tmp(new pcl::PointCloud<pcl::PointXYZRGBL>());
+    _filter.setFilterLimits(0.0, _minDistance);
+    _filter.filter(*tmp);
+    this->paintCloud(tmp, Qt::red);
+    *filtered += *tmp;
 
-    filter.setFilterLimits(0.5, 1.0);
-    filter.filter(*_cloudGreen);
+    _filter.setFilterLimits(_maxDistance, 4.0);
+    _filter.filter(*tmp);
+    this->paintCloud(tmp, Qt::red);
+    *filtered += *tmp;
 
-    this->paintCloud(_cloudRed, Qt::red);
-    this->paintCloud(_cloudGreen, Qt::green);
-
-    _cloud->clear();
-    *_cloud += *_cloudRed;
-    *_cloud += *_cloudGreen;
-
-    emit this->cloudGenerated(_cloud);
-    emit this->cloudRed(_cloudRed);
-    emit this->cloudGreen(_cloudGreen);
+    emit this->cloud(filtered);
 }
 
-void CloudManipulation::substractBackground(const cv::Mat& image, cv::Mat& mask)
+void CloudCatcher::substractBackground(const cv::Mat& image, cv::Mat& mask)
 {
     if (image.type() != CV_16UC1)
         return;
@@ -145,7 +143,7 @@ void CloudManipulation::substractBackground(const cv::Mat& image, cv::Mat& mask)
         *des = std::abs(static_cast<int>(*back) - static_cast<int>(*src)) > 100 ? 0xff : 0x00;
 }
 
-void CloudManipulation::paintCloud(pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cloud, const QColor& color)
+void CloudCatcher::paintCloud(pcl::PointCloud<pcl::PointXYZRGBL>::Ptr cloud, const QColor& color)
 {
     for (pcl::PointCloud<pcl::PointXYZRGBL>::iterator point(cloud->begin()); point < cloud->end(); ++point)
     {

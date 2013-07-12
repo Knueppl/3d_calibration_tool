@@ -1,7 +1,7 @@
 #ifndef __MAIN_WIDGET__
 #define __MAIN_WIDGET__
 
-#include "CloudManipulation.h"
+#include "CloudCatcher.h"
 #include "PlaneFinder.h"
 #include "ThermoCam.h"
 #include "OpenCvWidget.h"
@@ -35,7 +35,7 @@ private:
 
     Ui::MainWidget* _ui;
     QTimer _timer;
-    CloudManipulation _cloudManipulation;
+    CloudCatcher _cloudCatcher;
     PlaneFinder _planeFinder;
 
     OpenCvWidget _thermoView;

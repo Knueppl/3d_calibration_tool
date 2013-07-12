@@ -24,7 +24,7 @@ set(MOC_HEADERS
     ${SRC_DIR}/OpenNiSensorThread.h
     ${SRC_DIR}/MainWidget.h
     ${SRC_DIR}/CloudWidget.h
-    ${SRC_DIR}/CloudManipulation.h
+    ${SRC_DIR}/CloudCatcher.h
     ${SRC_DIR}/PlaneFinder.h
     ${SRC_DIR}/ConfigDialog.h
     ${SRC_DIR}/ThermoCamThread.h
@@ -63,7 +63,7 @@ add_executable(3d-calibration-tool
                ${SRC_DIR}/OpenNiSensorThread.cpp
                ${SRC_DIR}/MainWidget.cpp
                ${SRC_DIR}/CloudWidget.cpp
-               ${SRC_DIR}/CloudManipulation.cpp
+               ${SRC_DIR}/CloudCatcher.cpp
                ${SRC_DIR}/PlaneFinder.cpp
                ${SRC_DIR}/ConfigDialog.cpp
                ${SRC_DIR}/ThermoCamThread.cpp

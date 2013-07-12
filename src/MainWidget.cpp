@@ -17,11 +17,12 @@ MainWidget::MainWidget(void)
 //      _thermoCam("12100076.xml")
 {
     _ui->setupUi(this);
+    _cloudCatcher.setOperationRange(0.5, 1.0);
 
     this->connect(&_timer, SIGNAL(timeout()), this, SLOT(tick()));
-    this->connect(&_cloudManipulation, SIGNAL(cloudGenerated(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)),
+    this->connect(&_cloudCatcher, SIGNAL(cloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)),
                   _ui->_cloudWidget, SLOT(setCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)), Qt::DirectConnection);
-    this->connect(&_cloudManipulation, SIGNAL(cloudGenerated(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)),
+    this->connect(&_cloudCatcher, SIGNAL(catchedCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)),
                   &_planeFinder, SLOT(setInputCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)), Qt::DirectConnection);
 
     this->connect(&_planeFinder, SIGNAL(foundPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)),
@@ -40,7 +41,7 @@ MainWidget::~MainWidget(void)
 
 void MainWidget::tick(void)
 {
-    _cloudManipulation.trigger();
+    _cloudCatcher.trigger();
 //    _thermoCam.grab();
 //    _thermoView.setMat(_thermoCam.image());
 }

@@ -65,7 +65,7 @@ void PlaneFinder::search(void)
     seg.setMethodType(pcl::SAC_RANSAC);
     seg.setNormalDistanceWeight(0.01);
     seg.setMaxIterations(100);
-    seg.setDistanceThreshold(0.02);
+    seg.setDistanceThreshold(0.01);
 
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
@@ -107,7 +107,7 @@ void PlaneFinder::search(void)
     pca.setInputCloud(_planeCloud);
     Eigen::Matrix3f& eigenvectors = pca.getEigenVectors();
     Eigen::Vector3f& eigenvalues = pca.getEigenValues();
-    Eigen::Vector4f& mean = pca.getMean();
+    Eigen::Vector3f mean(pca.getMean()[0], pca.getMean()[1], pca.getMean()[2]);
 
     std::cout << "eigenvectors:" << std::endl << eigenvectors << std::endl;
     std::cout << "eigenvalues :" << std::endl << eigenvalues << std::endl;
@@ -118,14 +118,16 @@ void PlaneFinder::search(void)
 
 
     pcl::PointXYZ start;
-    start.x = mean[0] - eigenvectors(0, 0);
-    start.y = mean[1] - eigenvectors(1, 0);
-    start.z = mean[2] - eigenvectors(2, 0);
+    Eigen::Vector3f point(mean + eigenvectors.col(0) * (-_dialog->boardWidth() * 0.5));
+    start.x = point[0];
+    start.y = point[1];
+    start.z = point[2];
 
     pcl::PointXYZ end;
-    end.x = mean[0] + eigenvectors(0, 0);
-    end.y = mean[1] + eigenvectors(1, 0);
-    end.z = mean[2] + eigenvectors(2, 0);
+    point = mean + eigenvectors.col(0) * _dialog->boardWidth() * 0.5;
+    end.x = point[0];
+    end.y = point[1];
+    end.z = point[2];
 
     emit this->foundAxis(start, end);
     this->computePoints(mean, eigenvectors);
@@ -155,14 +157,13 @@ void PlaneFinder::copyCloudToMat(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cl
     }
 }
 
-void PlaneFinder::computePoints(const Eigen::Vector4f& mean, const Eigen::Matrix3f& eigenvectors)
+void PlaneFinder::computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix3f& eigenvectors)
 {
     const Eigen::Vector3f x(eigenvectors.col(0));
     const Eigen::Vector3f y(eigenvectors.col(1));
     const Eigen::Vector3f dx(x * (_dialog->boardWidth() - 2 * _dialog->borderLeft()) / _dialog->pointsVer());
     const Eigen::Vector3f dy(y * (_dialog->boardHeight() - 2 * _dialog->borderTop()) / _dialog->pointsHor());
-    const Eigen::Vector3f m(mean[0], mean[1], mean[2]);
-    const Eigen::Vector3f topLeft(m + x * (-(_dialog->boardWidth() - _dialog->borderLeft()) * 0.5)
+    const Eigen::Vector3f topLeft(mean + x * (-(_dialog->boardWidth() - _dialog->borderLeft()) * 0.5)
                                   + y * (-(_dialog->boardHeight() - _dialog->borderTop()) * 0.5));
 
     std::vector<Eigen::Vector3f> points;

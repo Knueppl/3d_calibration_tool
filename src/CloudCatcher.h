@@ -1,5 +1,5 @@
-#ifndef __CLOUD_MANIPULATION__
-#define __CLOUD_MANIPULATION__
+#ifndef __CLOUD_CATCHER__
+#define __CLOUD_CATCHER__
 
 #include <QThread>
 #include <QMutex>
@@ -8,26 +8,29 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/filters/extract_indices.h>
+#include <pcl/filters/passthrough.h>
 
 #include <opencv2/opencv.hpp>
 
 class OpenNiSensor;
 
-class CloudManipulation : public QThread
+class CloudCatcher : public QThread
 {
     Q_OBJECT
 
 public:
-    CloudManipulation(QObject* parent = 0);
-    virtual ~CloudManipulation(void);
+    CloudCatcher(QObject* parent = 0);
+    virtual ~CloudCatcher(void);
+
+    void setOperationRange(const float min, const float max);
 
 public slots:
     void trigger(void);
 
 signals:
-    void cloudGenerated(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
-    void cloudGreen(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
-    void cloudRed(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
+    void cloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
+    void catchedCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
 
 protected:
     virtual void run(void);
@@ -39,13 +42,14 @@ private:
 
     QMutex _mutex;
     QWaitCondition _triggered;
-    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr _cloud;
-    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr _cloudGreen;
-    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr _cloudRed;
+    pcl::ExtractIndices<pcl::PointXYZRGBL> _extract;
+    pcl::PassThrough<pcl::PointXYZRGBL> _filter;
     const std::vector<cv::Point3f>* _coords;
     const cv::Mat* _z;
     const cv::Mat* _image;
     OpenNiSensor* _sensor;
+    float _minDistance;
+    float _maxDistance;
 };
 
 #endif
