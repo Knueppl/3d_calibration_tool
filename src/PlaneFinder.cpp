@@ -65,7 +65,7 @@ void PlaneFinder::search(void)
     seg.setMethodType(pcl::SAC_RANSAC);
     seg.setNormalDistanceWeight(0.01);
     seg.setMaxIterations(100);
-    seg.setDistanceThreshold(0.01);
+    seg.setDistanceThreshold(0.02);
 
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
@@ -128,6 +128,7 @@ void PlaneFinder::search(void)
     end.z = mean[2] + eigenvectors(2, 0);
 
     emit this->foundAxis(start, end);
+    this->computePoints(mean, eigenvectors);
 }
 
 void PlaneFinder::computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals)
@@ -152,4 +153,32 @@ void PlaneFinder::copyCloudToMat(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cl
         *dataMat++ = point->y;
         *dataMat++ = point->z;
     }
+}
+
+void PlaneFinder::computePoints(const Eigen::Vector4f& mean, const Eigen::Matrix3f& eigenvectors)
+{
+    const Eigen::Vector3f x(eigenvectors.col(0));
+    const Eigen::Vector3f y(eigenvectors.col(1));
+    const Eigen::Vector3f dx(x * (_dialog->boardWidth() - 2 * _dialog->borderLeft()) / _dialog->pointsVer());
+    const Eigen::Vector3f dy(y * (_dialog->boardHeight() - 2 * _dialog->borderTop()) / _dialog->pointsHor());
+    const Eigen::Vector3f m(mean[0], mean[1], mean[2]);
+    const Eigen::Vector3f topLeft(m + x * (-(_dialog->boardWidth() - _dialog->borderLeft()) * 0.5)
+                                  + y * (-(_dialog->boardHeight() - _dialog->borderTop()) * 0.5));
+
+    std::vector<Eigen::Vector3f> points;
+    std::cout << "Found points:" << std::endl;
+
+    for (int row = 0; row < _dialog->pointsHor(); ++row)
+    {
+        const Eigen::Vector3f point(topLeft - row * dy);
+
+        for (int col = 0; col < _dialog->pointsVer(); ++col)
+        {
+            points.push_back(point + col * dx);
+            std::cout << points.back() << ", ";
+        }
+        std::cout << std::endl;
+    }
+
+    std::cout << std::endl;
 }

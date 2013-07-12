@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>289</width>
-    <height>161</height>
+    <width>354</width>
+    <height>235</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,10 +20,55 @@
       <string>Board Setup:</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="3">
+       <widget class="QDoubleSpinBox" name="_spinBorderLeft">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>9.990000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.087000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QDoubleSpinBox" name="_spinBorderTop">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>9.990000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.095000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Border Top:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="QSpinBox" name="_spinPointsWidth">
         <property name="value">
-         <number>8</number>
+         <number>7</number>
         </property>
        </widget>
       </item>
@@ -59,9 +104,9 @@
        </widget>
       </item>
       <item row="1" column="3">
-       <widget class="QSpinBox" name="_spinPointsWidth_2">
+       <widget class="QSpinBox" name="_spinPointsHeight">
         <property name="value">
-         <number>6</number>
+         <number>5</number>
         </property>
        </widget>
       </item>
@@ -74,7 +119,7 @@
          <double>9.999000000000001</double>
         </property>
         <property name="value">
-         <double>0.600000000000000</double>
+         <double>0.475000000000000</double>
         </property>
        </widget>
       </item>
@@ -90,7 +135,66 @@
          <double>0.010000000000000</double>
         </property>
         <property name="value">
-         <double>0.400000000000000</double>
+         <double>0.390000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>Border Left:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QDoubleSpinBox" name="_spinSpaceHor">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>9.990000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.050000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="3">
+       <widget class="QDoubleSpinBox" name="_spinSpaceVer">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>9.990000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.050000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="label_7">
+        <property name="text">
+         <string>Space Hor:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="2">
+       <widget class="QLabel" name="label_8">
+        <property name="text">
+         <string>Space Ver:</string>
         </property>
        </widget>
       </item>

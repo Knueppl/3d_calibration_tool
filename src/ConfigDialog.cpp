@@ -19,12 +19,22 @@ float ConfigDialog::boardWidth(void) const
     return _ui->_spinWidth->value();
 }
 
-int ConfigDialog::pointsHeight(void) const
+int ConfigDialog::pointsHor(void) const
 {
-    return _ui->_spinHeight->value();
+    return _ui->_spinPointsWidth->value();
 }
 
-int ConfigDialog::pointsWidth(void) const
+int ConfigDialog::pointsVer(void) const
 {
-    return _ui->_spinWidth->value();
+    return _ui->_spinPointsHeight->value();
+}
+
+float ConfigDialog::borderTop(void) const
+{
+    return _ui->_spinBorderTop->value();
+}
+
+float ConfigDialog::borderLeft(void) const
+{
+    return _ui->_spinBorderLeft->value();
 }

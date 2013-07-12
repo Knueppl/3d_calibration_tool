@@ -16,8 +16,10 @@ public:
 
     float boardWidth(void) const;
     float boardHeight(void) const;
-    int pointsWidth(void) const;
-    int pointsHeight(void) const;
+    int pointsVer(void) const;
+    int pointsHor(void) const;
+    float borderTop(void) const;
+    float borderLeft(void) const;
 
 private:
     Ui::ConfigDialog* _ui;
