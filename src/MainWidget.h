@@ -57,7 +57,7 @@ private:
     QMutex _mutex;
 
     OpenCvWidget _thermoView;
-//    ThermoCam _thermoCam;
+    ThermoCam _thermoCam;
 };
 
 #endif

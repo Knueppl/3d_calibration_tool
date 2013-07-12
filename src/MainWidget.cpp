@@ -20,11 +20,11 @@ const int TIME_S = 2;
 MainWidget::MainWidget(void)
     : QMainWindow(0),
       _ui(new Ui::MainWidget),
-      _state(Stop)
-//      _thermoCam("12100076.xml")
+      _state(Stop),
+      _thermoCam("12100076.xml")
 {
     _ui->setupUi(this);
-    _cloudCatcher.setOperationRange(0.5, 1.0);
+    _cloudCatcher.setOperationRange(1.5, 2.5);
 
     this->connect(&_timer, SIGNAL(timeout()), this, SLOT(tick()));
     this->connect(&_cloudCatcher, SIGNAL(cloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)),
@@ -52,8 +52,8 @@ MainWidget::~MainWidget(void)
 void MainWidget::tick(void)
 {
     _cloudCatcher.trigger();
-//    _thermoCam.grab();
-//    _thermoView.setMat(_thermoCam.image());
+    _thermoCam.grab();
+    _thermoView.setMat(_thermoCam.image());
 
     _mutex.lock();
 

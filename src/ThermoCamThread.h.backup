@@ -10,10 +10,8 @@
 #include <opencv2/opencv.hpp>
 
 namespace optris {
-class Imager;
+class PIImager;
 }
-
-class ImagerUVC;
 
 class ThermoCamThread : public QThread
 {
@@ -23,13 +21,11 @@ public:
     ThermoCamThread(const QByteArray& configFile, QObject* parent = 0);
     ~ThermoCamThread(void);
 
-    unsigned long serial(void) const { return _serial; }
-    const cv::Mat* image(void) const { return &_image[_bank]; }
-    void switchBank(void);
-
-public slots:
     void setAutoScale(const bool state);
     void setTemperatureRange(const float min, const float max);
+
+    const cv::Mat* image(void) const { return &_image[_bank]; }
+    void switchBank(void);
 
 protected:
     virtual void run(void);
@@ -48,10 +44,8 @@ private:
     void copyToImage(void);
     void switching(void);
 
-    optris::Imager*     _imager;
-    ImagerUVC*          _imagerUVC;
+    optris::PIImager*   _imager;
     unsigned char*      _bufferRaw;
-    const unsigned long _serial;
     QTimer _timer;
     QVector<cv::Mat> _image;
     QMutex _mutex;

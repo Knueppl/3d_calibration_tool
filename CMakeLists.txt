@@ -50,8 +50,9 @@ include_directories(${PROJECT_SOURCE_DIR}/build
 link_directories(${OPENNI_LIBRARY_DIRS}
                  ${OpenCV_LIBRARY_DIRS}
                  ${PCL_LIBRARY_DIRS}
-                 ${PROJECT_SOURCE_DIR}/lib/i386
-                 ${PROJECT_SOURCE_DIR}/lib/x86_64
+#                 ${PROJECT_SOURCE_DIR}/lib/i386
+#                 ${PROJECT_SOURCE_DIR}/lib/x86_64
+                 ${PROJECT_SOURCE_DIR}/lib
                  )
 
 
@@ -68,6 +69,9 @@ add_executable(3d-calibration-tool
                ${SRC_DIR}/ConfigDialog.cpp
                ${SRC_DIR}/ThermoCamThread.cpp
                ${SRC_DIR}/ThermoCam.cpp
+               ${SRC_DIR}/ImageBuilder.cpp
+               ${SRC_DIR}/ImagerUVC.cpp
+               ${SRC_DIR}/VideoDevice.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
                )
@@ -79,7 +83,7 @@ target_link_libraries(3d-calibration-tool
                       ${OpenCV_LIBS}
                       QVTK
                       ${VTK_LIBRARIES}
-                      PIImager
+                      Imager
                       ImageProcessing
                       udev
                       )

@@ -65,7 +65,7 @@ void PlaneFinder::search(void)
     seg.setMethodType(pcl::SAC_RANSAC);
     seg.setNormalDistanceWeight(0.01);
     seg.setMaxIterations(100);
-    seg.setDistanceThreshold(0.01);
+    seg.setDistanceThreshold(0.03);
 
     pcl::ModelCoefficients::Ptr coefficients(new pcl::ModelCoefficients());
     pcl::PointIndices::Ptr inliers(new pcl::PointIndices());
