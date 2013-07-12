@@ -24,7 +24,7 @@ public slots:
     void setInputCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
 
 signals:
-    void foundPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
+    void foundPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, const pcl::PointXYZ& start, const pcl::PointXYZ& end);
     void foundAxis(const pcl::PointXYZ& start, const pcl::PointXYZ& end);
 
 protected:

@@ -113,7 +113,6 @@ void PlaneFinder::search(void)
     std::cout << "eigenvalues :" << std::endl << eigenvalues << std::endl;
     std::cout << "mean : " << std::endl << mean << std::endl;
 
-    emit this->foundPlane(_planeCloud);
 
 
 
@@ -129,6 +128,7 @@ void PlaneFinder::search(void)
     end.y = point[1];
     end.z = point[2];
 
+    emit this->foundPlane(_planeCloud, start, end);
     emit this->foundAxis(start, end);
     this->computePoints(mean, eigenvectors);
 }

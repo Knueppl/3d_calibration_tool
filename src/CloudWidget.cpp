@@ -40,10 +40,12 @@ CloudWidget::CloudWidget(QWidget* parent)
     mapper->SetInputConnection(_lineSource->GetOutputPort());
     actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper(mapper);
-    actor->GetProperty()->SetLineWidth(4);
+    actor->GetProperty()->SetLineWidth(1);
 
     _renderer->AddActor(actor);
     _renderer->ResetCamera();
+
+    this->setLine(pcl::PointXYZ(), pcl::PointXYZ());
 }
 
 CloudWidget::~CloudWidget(void)
