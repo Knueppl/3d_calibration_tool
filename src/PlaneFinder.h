@@ -25,6 +25,7 @@ public slots:
 
 signals:
     void foundPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
+    void foundAxis(const pcl::PointXYZ& start, const pcl::PointXYZ& end);
 
 protected:
     virtual void run(void);

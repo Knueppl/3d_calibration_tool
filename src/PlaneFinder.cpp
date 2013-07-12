@@ -114,6 +114,20 @@ void PlaneFinder::search(void)
     std::cout << "mean : " << std::endl << mean << std::endl;
 
     emit this->foundPlane(_planeCloud);
+
+
+
+    pcl::PointXYZ start;
+    start.x = mean[0] - eigenvectors(0, 0);
+    start.y = mean[1] - eigenvectors(1, 0);
+    start.z = mean[2] - eigenvectors(2, 0);
+
+    pcl::PointXYZ end;
+    end.x = mean[0] + eigenvectors(0, 0);
+    end.y = mean[1] + eigenvectors(1, 0);
+    end.z = mean[2] + eigenvectors(2, 0);
+
+    emit this->foundAxis(start, end);
 }
 
 void PlaneFinder::computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals)

@@ -3,6 +3,8 @@
 
 #include "CloudManipulation.h"
 #include "PlaneFinder.h"
+#include "ThermoCam.h"
+#include "OpenCvWidget.h"
 
 #include <QTimer>
 #include <QMainWindow>
@@ -35,6 +37,9 @@ private:
     QTimer _timer;
     CloudManipulation _cloudManipulation;
     PlaneFinder _planeFinder;
+
+    OpenCvWidget _thermoView;
+//    ThermoCam _thermoCam;
 };
 
 #endif
