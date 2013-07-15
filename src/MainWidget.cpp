@@ -87,11 +87,11 @@ void MainWidget::tick(void)
     _thermoView.setMat(tempImage);
 
     std::vector<cv::Point2f> centers;
-    cv::findCirclesGrid(tempImage, cv::Size(7, 4), centers, cv::CALIB_CB_SYMMETRIC_GRID);
+    cv::findCirclesGrid(tempImage, cv::Size(7, 5), centers, cv::CALIB_CB_SYMMETRIC_GRID);
 
     cv::Mat image;
     _thermoCam.image().copyTo(image);
-    cv::drawChessboardCorners(image, cv::Size(7, 4), cv::Mat(centers), true);
+    cv::drawChessboardCorners(image, cv::Size(7, 5), cv::Mat(centers), true);
     _testView.setMat(image);
 
     _mutex.lock();
