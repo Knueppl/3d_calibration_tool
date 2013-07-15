@@ -20,6 +20,8 @@ public:
     int pointsHor(void) const;
     float borderTop(void) const;
     float borderLeft(void) const;
+    float temperatureMin(void) const;
+    float temperatureMax(void) const;
 
 private:
     Ui::ConfigDialog* _ui;

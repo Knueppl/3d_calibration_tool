@@ -53,8 +53,8 @@ ThermoCamThread::ThermoCamThread(const QByteArray& configFile, QObject* parent)
     _imager->setFrameCallback(callbackImager);
     _iBuilder->setDynamicScaling(true);
 
-    _image[BankA].create(_imager->getHeight(), _imager->getWidth(), CV_8UC3);
-    _image[BankB].create(_imager->getHeight(), _imager->getWidth(), CV_8UC3);
+    _image[BankA].create(_imager->getHeight(), _iBuilder->getStride(), CV_8UC3);
+    _image[BankB].create(_imager->getHeight(), _iBuilder->getStride(), CV_8UC3);
     _temperature[BankA].create(_imager->getHeight(), _imager->getWidth(), CV_16UC1);
     _temperature[BankB].create(_imager->getHeight(), _imager->getWidth(), CV_16UC1);
 

@@ -38,3 +38,13 @@ float ConfigDialog::borderLeft(void) const
 {
     return _ui->_spinBorderLeft->value();
 }
+
+float ConfigDialog::temperatureMin(void) const
+{
+    return _ui->_spinTempMin->value();
+}
+
+float ConfigDialog::temperatureMax(void) const
+{
+    return _ui->_spinTempMax->value();
+}

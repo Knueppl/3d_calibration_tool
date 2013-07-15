@@ -20,6 +20,8 @@ public:
     PlaneFinder(QObject* parent = 0);
     virtual ~PlaneFinder(void);
 
+    void setConfigDialog(ConfigDialog* dialog);
+
 public slots:
     void setInputCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
 

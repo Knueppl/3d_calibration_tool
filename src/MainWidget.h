@@ -5,6 +5,7 @@
 #include "PlaneFinder.h"
 #include "ThermoCam.h"
 #include "OpenCvWidget.h"
+#include "ConfigDialog.h"
 
 #include <QTimer>
 #include <QTime>
@@ -45,6 +46,7 @@ private:
                        std::vector<pcl::PointIndices>& clusters);
 
     Ui::MainWidget* _ui;
+    ConfigDialog _dialog;
     CloudCatcher _cloudCatcher;
     PlaneFinder _planeFinder;
 
@@ -57,6 +59,7 @@ private:
     QMutex _mutex;
 
     OpenCvWidget _thermoView;
+    OpenCvWidget _testView;
     ThermoCam _thermoCam;
 };
 

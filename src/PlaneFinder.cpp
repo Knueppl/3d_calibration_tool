@@ -20,15 +20,21 @@ PlaneFinder::PlaneFinder(QObject* parent)
       _beta(0.0),
       _gamma(0.0),
       _midPoint(1, 1, CV_32FC3),
-      _dialog(new ConfigDialog)
+      _dialog(0)
 {
     this->start();
-    _dialog->show();
 }
 
 PlaneFinder::~PlaneFinder(void)
 {
-    delete _dialog;
+
+}
+
+void PlaneFinder::setConfigDialog(ConfigDialog* dialog)
+{
+    _mutex.lock();
+    _dialog = dialog;
+    _mutex.unlock();
 }
 
 void PlaneFinder::run(void)
@@ -46,6 +52,12 @@ void PlaneFinder::setInputCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr clo
 {
     if (!_mutex.tryLock())
         return;
+
+    if (!_dialog)
+    {
+        _mutex.unlock();
+        return;
+    }
 
     _inputCloud->clear();
     *_inputCloud += *cloud;

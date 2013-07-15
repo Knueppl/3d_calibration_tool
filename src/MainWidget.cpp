@@ -25,6 +25,10 @@ MainWidget::MainWidget(void)
 {
     _ui->setupUi(this);
     _cloudCatcher.setOperationRange(1.5, 2.5);
+    _planeFinder.setConfigDialog(&_dialog);
+
+    QMenuBar* menuBar = this->menuBar();
+    menuBar->addAction("Config Dialog", &_dialog, SLOT(show()));
 
     this->connect(&_timer, SIGNAL(timeout()), this, SLOT(tick()));
     this->connect(&_cloudCatcher, SIGNAL(cloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)),
@@ -42,6 +46,7 @@ MainWidget::MainWidget(void)
 
     _timer.start(40);
     _thermoView.show();
+    _testView.show();
 }
 
 MainWidget::~MainWidget(void)
@@ -55,6 +60,9 @@ void MainWidget::tick(void)
     _thermoCam.grab();
 //    _thermoView.setMat(_thermoCam.image());
 
+    const unsigned short tempMin = static_cast<unsigned short>(_dialog.temperatureMin() * 10);
+    const unsigned short tempMax = static_cast<unsigned short>(_dialog.temperatureMax() * 10);
+    const float factor = 255.0f / (_dialog.temperatureMax() - _dialog.temperatureMin());
     const cv::Mat& temperature = _thermoCam.temperature();
     cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
 
@@ -67,16 +75,24 @@ void MainWidget::tick(void)
         {
             const unsigned short temp = *dataTemperature - 1000;
 
-            if (temp > 300)
+            if (temp > tempMax)
                 *dataTempImage++ = 0x00;
-            else if (temp < 100)
-                *dataTempImage++ = 0x00;
+            else if (temp < tempMin)
+                *dataTempImage++ = 0xff;
             else
-                *dataTempImage++ = static_cast<unsigned char>((*dataTemperature - 100) & 0xff);
+                *dataTempImage++ = 0xff - static_cast<unsigned char>(static_cast<float>((*dataTemperature - tempMin) & 0xff) * factor);
         }
     }
 
     _thermoView.setMat(tempImage);
+
+    std::vector<cv::Point2f> centers;
+    cv::findCirclesGrid(tempImage, cv::Size(7, 4), centers, cv::CALIB_CB_SYMMETRIC_GRID);
+
+    cv::Mat image;
+    _thermoCam.image().copyTo(image);
+    cv::drawChessboardCorners(image, cv::Size(7, 4), cv::Mat(centers), true);
+    _testView.setMat(image);
 
     _mutex.lock();
 
