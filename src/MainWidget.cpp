@@ -53,7 +53,30 @@ void MainWidget::tick(void)
 {
     _cloudCatcher.trigger();
     _thermoCam.grab();
-    _thermoView.setMat(_thermoCam.image());
+//    _thermoView.setMat(_thermoCam.image());
+
+    const cv::Mat& temperature = _thermoCam.temperature();
+    cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
+
+    for (int row = 0; row < temperature.rows; row++)
+    {
+        const uint16_t* dataTemperature = reinterpret_cast<const uint16_t*>(temperature.ptr(row));
+        unsigned char* dataTempImage = tempImage.ptr(row);
+
+        for (int col = 0; col < temperature.cols; col++, dataTemperature++)
+        {
+            const unsigned short temp = *dataTemperature - 1000;
+
+            if (temp > 300)
+                *dataTempImage++ = 0x00;
+            else if (temp < 100)
+                *dataTempImage++ = 0x00;
+            else
+                *dataTempImage++ = static_cast<unsigned char>((*dataTemperature - 100) & 0xff);
+        }
+    }
+
+    _thermoView.setMat(tempImage);
 
     _mutex.lock();
 

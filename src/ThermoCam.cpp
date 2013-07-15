@@ -7,10 +7,7 @@ ThermoCam::ThermoCam(const QByteArray& configFile)
     : _cam(new ThermoCamThread(configFile)),
       _image(0)
 {
-    if (!_cam)
-        return;
 
-    _cam->start();
 }
 
 ThermoCam::~ThermoCam(void)
@@ -27,4 +24,5 @@ void ThermoCam::grab(void)
 
     _cam->switchBank();
     _image = _cam->image();
+    _temperature = _cam->temperature();
 }

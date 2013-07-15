@@ -25,6 +25,7 @@ public:
 
     unsigned long serial(void) const { return _serial; }
     const cv::Mat* image(void) const { return &_image[_bank]; }
+    const cv::Mat* temperature(void) const { return &_temperature[_bank]; }
     void switchBank(void);
 
 public slots:
@@ -54,6 +55,7 @@ private:
     const unsigned long _serial;
     QTimer _timer;
     QVector<cv::Mat> _image;
+    QVector<cv::Mat> _temperature;
     QMutex _mutex;
     BufferBank _bank;
     QWaitCondition _waitFor;

@@ -14,10 +14,12 @@ public:
 
     void grab(void);
     const cv::Mat& image(void) const { return *_image; }
+    const cv::Mat& temperature(void) const { return *_temperature; }
 
 private:
     ThermoCamThread* _cam;
     const cv::Mat* _image;
+    const cv::Mat* _temperature;
 };
 
 #endif

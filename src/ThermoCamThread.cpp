@@ -7,14 +7,17 @@
 #include <QByteArray>
 #include <QDebug>
 
+#include <cstring>
+
 namespace {
 unsigned char*        _bufferShow = 0;
 unsigned short*       _bufferT    = 0;
 optris::ImageBuilder* _iBuilder   = 0;
 
-void callbackImager(unsigned short* image, unsigned int, unsigned int)
+void callbackImager(unsigned short* image, unsigned int w, unsigned int h)
 {
     _iBuilder->convertTemperatureToPalette(image, _bufferShow, optris::eIron);
+    std::memcpy(_bufferT, image, sizeof(unsigned short) * w * h);
 }
 }
 
@@ -25,6 +28,7 @@ ThermoCamThread::ThermoCamThread(const QByteArray& configFile, QObject* parent)
       _bufferRaw(0),
       _serial(_imagerUVC->FindFirstDevice()),
       _image(CountBanks),
+      _temperature(CountBanks),
       _bank(BankA)
 {
     if(!_serial || _imagerUVC->OpenDevice())
@@ -42,16 +46,19 @@ ThermoCamThread::ThermoCamThread(const QByteArray& configFile, QObject* parent)
     _iBuilder = new optris::ImageBuilder;
     _iBuilder->setSize(_imager->getWidth(), _imager->getHeight());
     delete _bufferT;
-    _bufferT = new unsigned short[_imager->getWidth(), _imager->getHeight()];
-
+    _bufferT = new unsigned short[_imagerUVC->GetWidth() * _imagerUVC->GetHeight()];
     _bufferRaw = new unsigned char[_imagerUVC->GetWidth() * _imagerUVC->GetHeight() * 2];
     delete [] _bufferShow;
     _bufferShow = new unsigned char[_iBuilder->getStride() * _imager->getHeight() * 3];
     _imager->setFrameCallback(callbackImager);
     _iBuilder->setDynamicScaling(true);
 
-    _image[BankA].create(_imager->getHeight(), _iBuilder->getStride(), CV_8UC3);
-    _image[BankB].create(_imager->getHeight(), _iBuilder->getStride(), CV_8UC3);
+    _image[BankA].create(_imager->getHeight(), _imager->getWidth(), CV_8UC3);
+    _image[BankB].create(_imager->getHeight(), _imager->getWidth(), CV_8UC3);
+    _temperature[BankA].create(_imager->getHeight(), _imager->getWidth(), CV_16UC1);
+    _temperature[BankB].create(_imager->getHeight(), _imager->getWidth(), CV_16UC1);
+
+    this->start();
 }
 
 ThermoCamThread::~ThermoCamThread(void)
@@ -68,8 +75,6 @@ ThermoCamThread::~ThermoCamThread(void)
 
 void ThermoCamThread::run(void)
 {
-//    qDebug() << __PRETTY_FUNCTION__;
-//    qDebug() << "Thread = " << QObject().thread();
     if (!_imager || !_imagerUVC || !_bufferRaw)
     {
         qDebug() << __PRETTY_FUNCTION__;
@@ -88,8 +93,6 @@ void ThermoCamThread::run(void)
 
 void ThermoCamThread::grab(void)
 {
-//    qDebug() << __PRETTY_FUNCTION__;
-//    qDebug() << "Thread = " << this->thread();
     _imagerUVC->GetFrame(_bufferRaw);
     _imager->process(_bufferRaw);
     _imagerUVC->ReleaseFrame();
@@ -102,9 +105,7 @@ void ThermoCamThread::copyToImage(void)
     unsigned char* data = _bufferShow;
     BufferBank bank;
 
-//    qDebug() << __PRETTY_FUNCTION__ << ": lock";
     _mutex.lock();
-//    qDebug() << __PRETTY_FUNCTION__ << ": locked";
 
     if (_bank == BankA)
         bank = BankB;
@@ -112,18 +113,26 @@ void ThermoCamThread::copyToImage(void)
         bank = BankA;
 
     unsigned char* dataMat = _image[bank].data;
-    const int size = _image[bank].rows * _image[bank].cols * 3;
+    const int sizeMat = _image[bank].rows * _image[bank].cols * 3;
 
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < sizeMat; ++i)
         *dataMat++ = *data++;
 
     cv::cvtColor(_image[bank], _image[bank], CV_BGR2RGB);
 
-//    _waitFor.wakeAll();
+    const unsigned short* dataBufferT = _bufferT;
+
+    for (int row = 0; row < _temperature[bank].rows; row++)
+    {
+        uint16_t* dataTemperature = reinterpret_cast<uint16_t*>(_temperature[bank].ptr(row));
+
+        for (int col = 0; col < _temperature[bank].cols; col++)
+        {
+            *dataTemperature++ = *dataBufferT++;
+        }
+    }
+
     _mutex.unlock();
-//    qDebug() << __PRETTY_FUNCTION__ << ": unlocked";
-//    qDebug() << __PRETTY_FUNCTION__ << ": wake other threads";
-//    qDebug() << "Thread = " << this->thread();
 }
 
 void ThermoCamThread::setAutoScale(const bool state)
@@ -138,18 +147,9 @@ void ThermoCamThread::setTemperatureRange(const float min, const float max)
 
 void ThermoCamThread::switchBank(void)
 {
-//    qDebug() << __PRETTY_FUNCTION__ << ": lock";
     _mutex.lock();
-
-//    qDebug() << __PRETTY_FUNCTION__ << ": locked";
-//    qDebug() << __PRETTY_FUNCTION__ << ": waitFor";
-//    qDebug() << "Thread = " << this->thread();
-//    _waitFor.wait(&_mutex);
-//    qDebug() << __PRETTY_FUNCTION__ << ": returned";
     this->switching();
-
     _mutex.unlock();
-//    qDebug() << __PRETTY_FUNCTION__ << ": unlocked";
 }
 
 void ThermoCamThread::switching(void)
@@ -158,4 +158,5 @@ void ThermoCamThread::switching(void)
         _bank = BankB;
     else
         _bank = BankA;
+
 }
