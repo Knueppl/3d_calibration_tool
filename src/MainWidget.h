@@ -3,9 +3,9 @@
 
 #include "CloudCatcher.h"
 #include "PlaneFinder.h"
-#include "ThermoCam.h"
 #include "OpenCvWidget.h"
 #include "ConfigDialog.h"
+#include "PointFinder.h"
 
 #include <QTimer>
 #include <QTime>
@@ -49,6 +49,7 @@ private:
     ConfigDialog _dialog;
     CloudCatcher _cloudCatcher;
     PlaneFinder _planeFinder;
+    PointFinder _pointFinder;
 
     QVector<pcl::PointCloud<pcl::PointXYZRGBL>::Ptr> _planes;
     QVector<pcl::PointXYZ> _planeLineStart;
@@ -59,8 +60,6 @@ private:
     QMutex _mutex;
 
     OpenCvWidget _thermoView;
-    OpenCvWidget _testView;
-    ThermoCam _thermoCam;
 };
 
 #endif

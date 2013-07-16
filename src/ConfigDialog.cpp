@@ -48,3 +48,8 @@ float ConfigDialog::temperatureMax(void) const
 {
     return _ui->_spinTempMax->value();
 }
+
+bool ConfigDialog::debugThermo(void) const
+{
+    return _ui->_checkDebugThermo->isChecked();
+}

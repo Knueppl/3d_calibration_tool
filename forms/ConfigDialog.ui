@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>390</width>
-    <height>308</height>
+    <width>399</width>
+    <height>340</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -238,6 +238,13 @@
         </property>
         <property name="value">
          <double>120.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="_checkDebugThermo">
+        <property name="text">
+         <string>Debug</string>
         </property>
        </widget>
       </item>

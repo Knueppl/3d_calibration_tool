@@ -9,6 +9,8 @@
 void OpenCvWidget::setMat(const cv::Mat& mat)
 {
     delete m_image;
+    cv::Mat tmp;
+    mat.copyTo(tmp);
 
     // 8-bits unsigned, NO. OF CHANNELS=1
     if(mat.type() == CV_8UC1)
@@ -19,10 +21,10 @@ void OpenCvWidget::setMat(const cv::Mat& mat)
             colorTable.push_back(qRgb(i, i, i));
 
         // Copy input Mat
-        const uchar *qImageBuffer = static_cast<const uchar*>(mat.data);
+        const uchar *qImageBuffer = static_cast<const uchar*>(tmp.data);
 
         // Create QImage with same dimensions as input Mat
-        m_image = new QImage(qImageBuffer, mat.cols, mat.rows, mat.step, QImage::Format_Indexed8);
+        m_image = new QImage(qImageBuffer, tmp.cols, tmp.rows, tmp.step, QImage::Format_Indexed8);
         m_image->setColorTable(colorTable);
     }
 
@@ -30,18 +32,18 @@ void OpenCvWidget::setMat(const cv::Mat& mat)
     else if(mat.type() == CV_8UC3)
     {
         // Copy input Mat
-        const uchar *qImageBuffer = static_cast<const uchar*>(mat.data);
+        const uchar *qImageBuffer = static_cast<const uchar*>(tmp.data);
 
         // Create QImage with same dimensions as input Mat
-        QImage img(qImageBuffer, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
+        QImage img(qImageBuffer, tmp.cols, tmp.rows, tmp.step, QImage::Format_RGB888);
         m_image = new QImage(img.rgbSwapped());
     }
 
     // 16-bits depth image
     else if (mat.type() == CV_16UC1)
     {
-        const uchar* qImageBuffer = static_cast<const uchar*>(mat.data);
-        m_image = new QImage(qImageBuffer, mat.cols, mat.rows, mat.step, QImage::Format_RGB16);
+        const uchar* qImageBuffer = static_cast<const uchar*>(tmp.data);
+        m_image = new QImage(qImageBuffer, tmp.cols, tmp.rows, tmp.step, QImage::Format_RGB16);
     }
     else
     {

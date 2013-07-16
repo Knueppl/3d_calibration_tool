@@ -22,6 +22,7 @@ public:
     float borderLeft(void) const;
     float temperatureMin(void) const;
     float temperatureMax(void) const;
+    bool debugThermo(void) const;
 
 private:
     Ui::ConfigDialog* _ui;

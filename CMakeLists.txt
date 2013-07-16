@@ -28,6 +28,7 @@ set(MOC_HEADERS
     ${SRC_DIR}/PlaneFinder.h
     ${SRC_DIR}/ConfigDialog.h
     ${SRC_DIR}/ThermoCamThread.h
+    ${SRC_DIR}/PointFinder.h
     )
 
 set(FORMS
@@ -72,6 +73,7 @@ add_executable(3d-calibration-tool
                ${SRC_DIR}/ImageBuilder.cpp
                ${SRC_DIR}/ImagerUVC.cpp
                ${SRC_DIR}/VideoDevice.cpp
+               ${SRC_DIR}/PointFinder.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
                )

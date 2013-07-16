@@ -20,12 +20,12 @@ const int TIME_S = 2;
 MainWidget::MainWidget(void)
     : QMainWindow(0),
       _ui(new Ui::MainWidget),
-      _state(Stop),
-      _thermoCam("12100076.xml")
+      _state(Stop)
 {
     _ui->setupUi(this);
     _cloudCatcher.setOperationRange(1.5, 2.5);
     _planeFinder.setConfigDialog(&_dialog);
+    _pointFinder.setConfigDialog(&_dialog);
 
     QMenuBar* menuBar = this->menuBar();
     menuBar->addAction("Config Dialog", &_dialog, SLOT(show()));
@@ -38,6 +38,7 @@ MainWidget::MainWidget(void)
 
     this->connect(&_planeFinder, SIGNAL(foundPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr, const pcl::PointXYZ&, const pcl::PointXYZ&)),
                   this, SLOT(addPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr, const pcl::PointXYZ&, const pcl::PointXYZ&)), Qt::DirectConnection);
+    this->connect(&_pointFinder, SIGNAL(image(const cv::Mat&)), &_thermoView, SLOT(setMat(const cv::Mat&)));
 
     this->connect(_ui->_buttonStartStop, SIGNAL(clicked()), this, SLOT(startStop()));
     _ui->_buttonStartStop->setText("Start");
@@ -46,7 +47,6 @@ MainWidget::MainWidget(void)
 
     _timer.start(40);
     _thermoView.show();
-    _testView.show();
 }
 
 MainWidget::~MainWidget(void)
@@ -57,42 +57,7 @@ MainWidget::~MainWidget(void)
 void MainWidget::tick(void)
 {
     _cloudCatcher.trigger();
-    _thermoCam.grab();
-//    _thermoView.setMat(_thermoCam.image());
-
-    const unsigned short tempMin = static_cast<unsigned short>(_dialog.temperatureMin() * 10);
-    const unsigned short tempMax = static_cast<unsigned short>(_dialog.temperatureMax() * 10);
-    const float factor = 255.0f / (_dialog.temperatureMax() - _dialog.temperatureMin());
-    const cv::Mat& temperature = _thermoCam.temperature();
-    cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
-
-    for (int row = 0; row < temperature.rows; row++)
-    {
-        const uint16_t* dataTemperature = reinterpret_cast<const uint16_t*>(temperature.ptr(row));
-        unsigned char* dataTempImage = tempImage.ptr(row);
-
-        for (int col = 0; col < temperature.cols; col++, dataTemperature++)
-        {
-            const unsigned short temp = *dataTemperature - 1000;
-
-            if (temp > tempMax)
-                *dataTempImage++ = 0x00;
-            else if (temp < tempMin)
-                *dataTempImage++ = 0xff;
-            else
-                *dataTempImage++ = 0xff - static_cast<unsigned char>(static_cast<float>((*dataTemperature - tempMin) & 0xff) * factor);
-        }
-    }
-
-    _thermoView.setMat(tempImage);
-
-    std::vector<cv::Point2f> centers;
-    cv::findCirclesGrid(tempImage, cv::Size(7, 5), centers, cv::CALIB_CB_SYMMETRIC_GRID);
-
-    cv::Mat image;
-    _thermoCam.image().copyTo(image);
-    cv::drawChessboardCorners(image, cv::Size(7, 5), cv::Mat(centers), true);
-    _testView.setMat(image);
+    _pointFinder.trigger();
 
     _mutex.lock();
 
