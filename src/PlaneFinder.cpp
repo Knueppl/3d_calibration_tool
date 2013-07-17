@@ -90,7 +90,7 @@ void PlaneFinder::search(void)
 
     if (inliers->indices.size() < 1000)
     {
-        qDebug() << "Could not estimate a plane model for the given dataset.";
+//        qDebug() << "Could not estimate a plane model for the given dataset.";
         return;
     }
 
@@ -100,11 +100,11 @@ void PlaneFinder::search(void)
     _gamma = std::acos(coefficients->values[2] / normalAbs);
 
     /* check model cooefficients */
-    qDebug() << "model coefficients:";
-    qDebug() << "----------------------------------";
-    qDebug() << "alpha = " << _alpha / M_PI * 180.0;
-    qDebug() << "beta  = " << _beta / M_PI * 180.0;
-    qDebug() << "gamma = " << _gamma / M_PI * 180.0;
+//    qDebug() << "model coefficients:";
+//    qDebug() << "----------------------------------";
+//    qDebug() << "alpha = " << _alpha / M_PI * 180.0;
+//    qDebug() << "beta  = " << _beta / M_PI * 180.0;
+//    qDebug() << "gamma = " << _gamma / M_PI * 180.0;
 
     pcl::ExtractIndices<pcl::PointXYZRGBL> extract;
 
@@ -121,9 +121,9 @@ void PlaneFinder::search(void)
     Eigen::Vector3f& eigenvalues = pca.getEigenValues();
     Eigen::Vector3f mean(pca.getMean()[0], pca.getMean()[1], pca.getMean()[2]);
 
-    std::cout << "eigenvectors:" << std::endl << eigenvectors << std::endl;
-    std::cout << "eigenvalues :" << std::endl << eigenvalues << std::endl;
-    std::cout << "mean : " << std::endl << mean << std::endl;
+//    std::cout << "eigenvectors:" << std::endl << eigenvectors << std::endl;
+//    std::cout << "eigenvalues :" << std::endl << eigenvalues << std::endl;
+//    std::cout << "mean : " << std::endl << mean << std::endl;
 
 
 
@@ -140,9 +140,10 @@ void PlaneFinder::search(void)
     end.y = point[1];
     end.z = point[2];
 
-    emit this->foundPlane(_planeCloud, start, end);
+    std::vector<cv::Point3f> points;
     emit this->foundAxis(start, end);
-    this->computePoints(mean, eigenvectors);
+    this->computePoints(mean, eigenvectors, points);
+    emit this->foundPlane(_planeCloud, start, end, points);
 }
 
 void PlaneFinder::computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals)
@@ -169,7 +170,7 @@ void PlaneFinder::copyCloudToMat(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cl
     }
 }
 
-void PlaneFinder::computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix3f& eigenvectors)
+void PlaneFinder::computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix3f& eigenvectors, std::vector<cv::Point3f>& points)
 {
     const Eigen::Vector3f x(eigenvectors.col(0));
     const Eigen::Vector3f y(eigenvectors.col(1));
@@ -178,8 +179,7 @@ void PlaneFinder::computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix
     const Eigen::Vector3f topLeft(mean + x * (-(_dialog->boardWidth() - _dialog->borderLeft()) * 0.5)
                                   + y * (-(_dialog->boardHeight() - _dialog->borderTop()) * 0.5));
 
-    std::vector<Eigen::Vector3f> points;
-    std::cout << "Found points:" << std::endl;
+//    std::cout << "Found points:" << std::endl;
 
     for (int row = 0; row < _dialog->pointsHor(); ++row)
     {
@@ -187,11 +187,13 @@ void PlaneFinder::computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix
 
         for (int col = 0; col < _dialog->pointsVer(); ++col)
         {
-            points.push_back(point + col * dx);
-            std::cout << points.back() << ", ";
+            Eigen::Vector3f tmpEigen(point + col * dx);
+            cv::Point3f tmpCv(tmpEigen[0], tmpEigen[1], tmpEigen[2]);
+            points.push_back(tmpCv);
+//            std::cout << points.back() << ", ";
         }
-        std::cout << std::endl;
+//        std::cout << std::endl;
     }
 
-    std::cout << std::endl;
+//    std::cout << std::endl;
 }

@@ -26,7 +26,8 @@ public slots:
     void setInputCloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud);
 
 signals:
-    void foundPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, const pcl::PointXYZ& start, const pcl::PointXYZ& end);
+    void foundPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, const pcl::PointXYZ& start,
+                    const pcl::PointXYZ& end, const std::vector<cv::Point3f>& points);
     void foundAxis(const pcl::PointXYZ& start, const pcl::PointXYZ& end);
 
 protected:
@@ -36,7 +37,7 @@ private:
     void search(void);
     void computeNormals(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, pcl::PointCloud<pcl::Normal>::Ptr normals);
     void copyCloudToMat(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, cv::Mat& mat);
-    void computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix3f& eigenvectors);
+void computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix3f& eigenvectors, std::vector<cv::Point3f>& points);
 
     QMutex _mutex;
     QWaitCondition _updated;

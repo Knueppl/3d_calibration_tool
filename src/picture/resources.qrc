@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="picture">
+    <file>DeleteRed.png</file>
+    <file>AcceptGreen.png</file>
+  </qresource>
+</RCC>

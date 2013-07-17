@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>527</width>
-    <height>478</height>
+    <width>994</width>
+    <height>624</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_2">
+   <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
      <widget class="CloudWidget" name="_cloudWidget" native="true"/>
     </item>
@@ -36,13 +36,89 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="_buttonAccept">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>36</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normalon>:/picture/AcceptGreen.png</normalon>
+           </iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="_buttonDisclaim">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>36</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normalon>:/picture/DeleteRed.png</normalon>
+           </iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="_buttonCali">
+          <property name="text">
+           <string>Calibrate</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
-       <widget class="QListWidget" name="_listPlanes"/>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QListWidget" name="_listPlanes"/>
+        </item>
+        <item>
+         <widget class="OpenCvWidget" name="_thermoView" native="true"/>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="CloudWidget" name="_planeWidget" native="true"/>
+       <widget class="CloudWidget" name="_planeWidget" native="true">
+        <zorder>horizontalLayoutWidget</zorder>
+       </widget>
       </item>
      </layout>
     </item>
@@ -53,7 +129,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>527</width>
+     <width>994</width>
      <height>29</height>
     </rect>
    </property>
@@ -67,7 +143,15 @@
    <header>CloudWidget.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>OpenCvWidget</class>
+   <extends>QWidget</extends>
+   <header>OpenCvWidget.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="../src/picture/resources.qrc"/>
+ </resources>
  <connections/>
 </ui>
