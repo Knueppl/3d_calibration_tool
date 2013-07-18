@@ -152,6 +152,7 @@ void MainWidget::addPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, co
     if (!centers.size())
     {
         qDebug() << "No points found in thermal image.";
+        delete image;
         _mutex.unlock();
         return;
     }
@@ -188,8 +189,6 @@ void MainWidget::selectPlane(int index)
 
 void MainWidget::findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image)
 {
-    static OpenCvWidget matView;
-
     const cv::Mat& temperature = _thermoCam.temperature();
     const unsigned short tempMin = static_cast<unsigned short>(_dialog.temperatureMin() * 10);
     const unsigned short tempMax = static_cast<unsigned short>(_dialog.temperatureMax() * 10);
@@ -214,8 +213,8 @@ void MainWidget::findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image)
         }
     }
 
-    matView.setVisible(_dialog.debugThermo());
-    matView.setMat(tempImage);
+//    _matView.setVisible(_dialog.debugThermo());
+//    _matView.setMat(tempImage);
 
     const cv::Size patternSize(_dialog.pointsHor(), _dialog.pointsVer());
     _thermoCam.image().copyTo(image);
@@ -286,7 +285,7 @@ void MainWidget::calibrate(void)
         return;
     }
 
-    corners.resize(points.size());
+    corners.resize(points.size(), corners[0]);
     cv::Mat intrinsic(3, 3, CV_64F);
     cv::Mat distortion(1, 8, CV_64F);
     std::vector<cv::Mat> rvecs, tvecs;
@@ -295,6 +294,8 @@ void MainWidget::calibrate(void)
 
     qDebug() << "rms error intrinsic: " << cv::calibrateCamera(corners, points, _thermalImages[0]->size(), intrinsic,
                                                                distortion, rvecs, tvecs);
+
+    std::cout << "object points: " << std::endl << planePoints << std::endl;
 
     cv::Mat r, t;
     cv::solvePnP(planePoints, imagePoints, intrinsic, distortion, r, t);

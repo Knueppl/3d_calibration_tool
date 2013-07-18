@@ -8,7 +8,7 @@ find_package(PCL 1.7 REQUIRED)
 pkg_check_modules(OPENNI libopenni2)
 find_package(Qt4 REQUIRED)
 find_package(VTK REQUIRED)
-find_package(OpenCV 2.4.6.1 REQUIRED)
+find_package(OpenCV 2.3 REQUIRED)
 
 include(${QT_USE_FILE})
 
