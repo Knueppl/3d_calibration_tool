@@ -214,7 +214,7 @@ void MainWidget::findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image)
     }
 
 //    _matView.setVisible(_dialog.debugThermo());
-//    _matView.setMat(tempImage);
+    _ui->_matView->setMat(tempImage);
 
     const cv::Size patternSize(_dialog.pointsHor(), _dialog.pointsVer());
     _thermoCam.image().copyTo(image);

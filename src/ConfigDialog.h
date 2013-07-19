@@ -23,6 +23,8 @@ public:
     float temperatureMin(void) const;
     float temperatureMax(void) const;
     bool debugThermo(void) const;
+    float spaceHor(void) const;
+    float spaceVer(void) const;
 
 private:
     Ui::ConfigDialog* _ui;

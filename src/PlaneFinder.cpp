@@ -174,18 +174,18 @@ void PlaneFinder::computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix
 {
     const Eigen::Vector3f x(eigenvectors.col(0));
     const Eigen::Vector3f y(eigenvectors.col(1));
-    const Eigen::Vector3f dx(x * (_dialog->boardWidth() - 2 * _dialog->borderLeft()) / _dialog->pointsVer());
-    const Eigen::Vector3f dy(y * (_dialog->boardHeight() - 2 * _dialog->borderTop()) / _dialog->pointsHor());
-    const Eigen::Vector3f topLeft(mean + x * (-(_dialog->boardWidth() - _dialog->borderLeft()) * 0.5)
-                                  + y * (-(_dialog->boardHeight() - _dialog->borderTop()) * 0.5));
+    const Eigen::Vector3f dx(x * _dialog->spaceHor());
+    const Eigen::Vector3f dy(y * _dialog->spaceVer());
+    const Eigen::Vector3f topLeft(mean + x * (-(_dialog->boardWidth() - 2.0 * _dialog->borderLeft()) * 0.5)
+                                  + y * (-(_dialog->boardHeight() - 2.0 * _dialog->borderTop()) * 0.5));
 
 //    std::cout << "Found points:" << std::endl;
 
-    for (int row = 0; row < _dialog->pointsHor(); ++row)
+    for (int row = 0; row < _dialog->pointsVer(); ++row)
     {
         const Eigen::Vector3f point(topLeft - row * dy);
 
-        for (int col = 0; col < _dialog->pointsVer(); ++col)
+        for (int col = 0; col < _dialog->pointsHor(); ++col)
         {
             Eigen::Vector3f tmpEigen(point + col * dx);
             cv::Point3f tmpCv(tmpEigen[0], tmpEigen[1], tmpEigen[2]);

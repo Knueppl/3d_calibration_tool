@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout_3">
+   <layout class="QHBoxLayout" name="horizontalLayout_4">
     <item>
      <widget class="CloudWidget" name="_cloudWidget" native="true"/>
     </item>
@@ -116,9 +116,14 @@
        </layout>
       </item>
       <item>
-       <widget class="CloudWidget" name="_planeWidget" native="true">
-        <zorder>horizontalLayoutWidget</zorder>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="CloudWidget" name="_planeWidget" native="true"/>
+        </item>
+        <item>
+         <widget class="OpenCvWidget" name="_matView" native="true"/>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>

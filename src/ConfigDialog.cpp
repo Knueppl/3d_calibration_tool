@@ -53,3 +53,13 @@ bool ConfigDialog::debugThermo(void) const
 {
     return _ui->_checkDebugThermo->isChecked();
 }
+
+float ConfigDialog::spaceHor(void) const
+{
+    return _ui->_spinSpaceHor->value();
+}
+
+float ConfigDialog::spaceVer(void) const
+{
+    return _ui->_spinSpaceVer->value();
+}
