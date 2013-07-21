@@ -124,11 +124,11 @@ void PlaneFinder::search(void)
 //    Eigen::Vector3f& eigenvalues = pca.getEigenValues();
     Eigen::Vector3f mean(pca.getMean()[0], pca.getMean()[1], pca.getMean()[2]);
     Eigen::Matrix4f T;
-    T.col(0) = Eigen::Vector4f(eigenvectors.col(0)[0], eigenvectors.col(0)[1], eigenvectors.col(0)[2], mean[0]);
-//    std::cout << "eigenvectors:" << std::endl << eigenvectors << std::endl;
-//    std::cout << "eigenvalues :" << std::endl << eigenvalues << std::endl;
-//    std::cout << "mean : " << std::endl << mean << std::endl;
 
+    for (int i = 0; i < 3; i++)
+        T.row(i) = Eigen::Vector4f(eigenvectors.row(i)[0], eigenvectors.row(i)[1], eigenvectors.row(i)[2], mean[i]);
+
+    T(3, 3) = 1.0;
 
     pcl::PointCloud<pcl::PointXYZRGBL>::Ptr final(new pcl::PointCloud<pcl::PointXYZRGBL>());
     pcl::IterativeClosestPoint<pcl::PointXYZRGBL, pcl::PointXYZRGBL> icp;
@@ -138,7 +138,7 @@ void PlaneFinder::search(void)
     icp.setMaximumIterations(100);
     icp.setTransformationEpsilon(1e-8);
     icp.setEuclideanFitnessEpsilon(1.0);
-    icp.align(*final);
+    icp.align(*final, T);
     final->swap(*_planeCloud);
 
     if (!icp.hasConverged())

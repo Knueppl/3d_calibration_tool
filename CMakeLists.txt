@@ -36,11 +36,11 @@ set(FORMS
     ${FORM_DIR}/ConfigDialog.ui
     )
 
-set(OHMGUI_RESOURCES ${PROJECT_SOURCE_DIR}/src/picture/resource.qrc)
+set(RESOURCES ${PROJECT_SOURCE_DIR}/src/picture/resources.qrc)
 
 QT4_WRAP_CPP(HEADERS_MOC ${MOC_HEADERS})
 QT4_WRAP_UI(FORMS_MOC ${FORMS})
-QT4_ADD_RESOURCES(OHMGUI_RESOURCES_RCC ${OHMGUI_RESOURCES})
+QT4_ADD_RESOURCES(RESOURCES_RCC ${RESOURCES})
 
 include_directories(${PROJECT_SOURCE_DIR}/build
                     ${OPENNI_INCLUDE_DIRS}
@@ -78,6 +78,7 @@ add_executable(3d-calibration-tool
                ${SRC_DIR}/PointFinder.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
+               ${RESOURCES_RCC}
                )
 
 target_link_libraries(3d-calibration-tool
