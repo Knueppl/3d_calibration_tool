@@ -25,6 +25,16 @@ public:
     bool debugThermo(void) const;
     float spaceHor(void) const;
     float spaceVer(void) const;
+    float sensorSolution(void) const;
+    float a(void) const;
+    float b(void) const;
+    float c(void) const;
+
+signals:
+    void generateCalibrationBoard(void);
+
+private slots:
+    void generate(void);
 
 private:
     Ui::ConfigDialog* _ui;

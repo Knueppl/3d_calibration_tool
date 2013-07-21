@@ -7,6 +7,12 @@ ConfigDialog::ConfigDialog(QWidget* parent)
 {
     _ui->setupUi(this);
     this->connect(_ui->_buttonClose, SIGNAL(clicked()), this, SLOT(accept()));
+    this->connect(_ui->_buttonGenerate, SIGNAL(clicked()), this, SLOT(generate()));
+}
+
+void ConfigDialog::generate(void)
+{
+    emit this->generateCalibrationBoard();
 }
 
 float ConfigDialog::boardHeight(void) const
@@ -62,4 +68,24 @@ float ConfigDialog::spaceHor(void) const
 float ConfigDialog::spaceVer(void) const
 {
     return _ui->_spinSpaceVer->value();
+}
+
+float ConfigDialog::sensorSolution(void) const
+{
+    return _ui->_spinSensorSolution->value();
+}
+
+float ConfigDialog::a(void) const
+{
+    return _ui->_spinA->value();
+}
+
+float ConfigDialog::b(void) const
+{
+    return _ui->_spinB->value();
+}
+
+float ConfigDialog::c(void) const
+{
+    return _ui->_spinC->value();
 }

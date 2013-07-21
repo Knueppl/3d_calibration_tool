@@ -48,8 +48,9 @@ MainWidget::MainWidget(void)
     this->connect(_ui->_buttonDisclaim, SIGNAL(clicked()), this, SLOT(disclaimPlane()));
 
     this->connect(_ui->_listPlanes, SIGNAL(currentRowChanged(int)), this, SLOT(selectPlane(int)));
+    this->connect(&_dialog, SIGNAL(generateCalibrationBoard()), &_planeFinder, SLOT(generateCalibrationBoard()));
 
-    _timer.start(40);
+//    _timer.start(40);
 }
 
 MainWidget::~MainWidget(void)
@@ -137,6 +138,7 @@ void MainWidget::startStop(void)
 void MainWidget::addPlane(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr cloud, const pcl::PointXYZ& start, const pcl::PointXYZ& end, const std::vector<cv::Point3f>& points)
 {
     _mutex.lock();
+    _ui->_planeWidget->setCloud(cloud);
 
     if (_state != Armed)
     {

@@ -6,6 +6,7 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/filters/extract_indices.h>
 #include <pcl/common/pca.h>
+#include <pcl/registration/icp.h>
 
 #include <cmath>
 #include <iostream>
@@ -16,6 +17,7 @@ PlaneFinder::PlaneFinder(QObject* parent)
     : QThread(parent),
       _inputCloud(new pcl::PointCloud<pcl::PointXYZRGBL>()),
       _planeCloud(new pcl::PointCloud<pcl::PointXYZRGBL>()),
+      _caliBoardCloud(new pcl::PointCloud<pcl::PointXYZRGBL>()),
       _alpha(0.0),
       _beta(0.0),
       _gamma(0.0),
@@ -23,6 +25,7 @@ PlaneFinder::PlaneFinder(QObject* parent)
       _dialog(0)
 {
     this->start();
+    this->generateCalibrationBoard();
 }
 
 PlaneFinder::~PlaneFinder(void)
@@ -118,15 +121,28 @@ void PlaneFinder::search(void)
     pcl::PCA<pcl::PointXYZRGBL> pca(true);
     pca.setInputCloud(_planeCloud);
     Eigen::Matrix3f& eigenvectors = pca.getEigenVectors();
-    Eigen::Vector3f& eigenvalues = pca.getEigenValues();
+//    Eigen::Vector3f& eigenvalues = pca.getEigenValues();
     Eigen::Vector3f mean(pca.getMean()[0], pca.getMean()[1], pca.getMean()[2]);
-
+    Eigen::Matrix4f T;
+    T.col(0) = Eigen::Vector4f(eigenvectors.col(0)[0], eigenvectors.col(0)[1], eigenvectors.col(0)[2], mean[0]);
 //    std::cout << "eigenvectors:" << std::endl << eigenvectors << std::endl;
 //    std::cout << "eigenvalues :" << std::endl << eigenvalues << std::endl;
 //    std::cout << "mean : " << std::endl << mean << std::endl;
 
 
+    pcl::PointCloud<pcl::PointXYZRGBL>::Ptr final(new pcl::PointCloud<pcl::PointXYZRGBL>());
+    pcl::IterativeClosestPoint<pcl::PointXYZRGBL, pcl::PointXYZRGBL> icp;
+    icp.setInputSource(_planeCloud);
+    icp.setInputTarget(_caliBoardCloud);
+    icp.setMaxCorrespondenceDistance(0.02);
+    icp.setMaximumIterations(100);
+    icp.setTransformationEpsilon(1e-8);
+    icp.setEuclideanFitnessEpsilon(1.0);
+    icp.align(*final);
+    final->swap(*_planeCloud);
 
+    if (!icp.hasConverged())
+        return;
 
     pcl::PointXYZ start;
     Eigen::Vector3f point(mean + eigenvectors.col(0) * (-_dialog->boardWidth() * 0.5));
@@ -196,4 +212,125 @@ void PlaneFinder::computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix
     }
 
 //    std::cout << std::endl;
+}
+
+void PlaneFinder::generateCalibrationBoard(void)
+{
+    _mutex.lock();
+    _caliBoardCloud->clear();
+
+    if (!_dialog)
+    {
+        _mutex.unlock();
+        return;
+    }
+
+    const float solution = _dialog->sensorSolution();
+
+    // Part 1 of calibration board
+    const float xEnd1 = _dialog->boardWidth() * 0.5 - _dialog->a();
+    const float yEnd1 = -_dialog->boardHeight() * 0.5 + _dialog->a();
+
+    for (float y = _dialog->boardHeight() * 0.5; y >= yEnd1; y -= solution)
+    {
+        pcl::PointXYZRGBL point;
+        point.y = y;
+        point.z = 0.0;
+        point.r = 0xff;
+        point.g = 0x6b;
+        point.b = 0x00;
+
+        for (float x = -_dialog->boardWidth() * 0.5; x <= xEnd1; x += solution)
+        {
+            point.x = x;
+            _caliBoardCloud->push_back(point);
+        }
+    }
+
+
+    // Part 2 of calibration board
+    const float xEnd2 = -_dialog->boardWidth() * 0.5 + _dialog->b();
+    const float yEnd2 = -_dialog->boardHeight() * 0.5;
+
+    for (float y = -_dialog->boardHeight() * 0.5 + _dialog->a() - solution; y >= yEnd2; y -= solution)
+    {
+        pcl::PointXYZRGBL point;
+        point.y = y;
+        point.z = 0.0;
+        point.r = 0xff;
+        point.g = 0x60;
+        point.b = 0x00;
+
+        for (float x = -_dialog->boardWidth() * 0.5; x <= xEnd2; x += solution)
+        {
+            point.x = x;
+            _caliBoardCloud->push_back(point);
+        }
+    }
+
+
+    // Part 3 of calibration board
+    const float xEnd3 = _dialog->boardWidth() * 0.5;
+    const float yEnd3 = -_dialog->boardHeight() * 0.5;
+
+    for (float y = -_dialog->boardHeight() * 0.5 + _dialog->a() - solution; y >= yEnd3; y -= solution)
+    {
+        pcl::PointXYZRGBL point;
+        point.y = y;
+        point.z = 0.0;
+        point.r = 0x64;
+        point.g = 0xff;
+        point.b = 0x00;
+
+        for (float x = -_dialog->boardWidth() * 0.5 + 2.0 * _dialog->b(); x <= xEnd3; x += solution)
+        {
+            point.x = x;
+            _caliBoardCloud->push_back(point);
+        }
+    }
+
+
+    // Part 4 of calibration board
+    const float xEnd4 = _dialog->boardWidth() * 0.5;
+    const float yEnd4 = -_dialog->boardHeight() * 0.5 + _dialog->a();
+
+    for (float y = _dialog->boardHeight() * 0.5 - 2.0 * _dialog->c(); y >= yEnd4; y -= solution)
+    {
+        pcl::PointXYZRGBL point;
+        point.y = y;
+        point.z = 0.0;
+        point.r = 0x64;
+        point.g = 0xff;
+        point.b = 0x00;
+
+        for (float x = _dialog->boardWidth() * 0.5 - _dialog->a() + solution; x <= xEnd4; x += solution)
+        {
+            point.x = x;
+            _caliBoardCloud->push_back(point);
+        }
+    }
+
+
+    // Part 5 of calibration board
+    const float xEnd5 = _dialog->boardWidth() * 0.5;
+    const float yEnd5 = _dialog->boardHeight() * 0.5 - _dialog->c();
+
+    for (float y = _dialog->boardHeight() * 0.5; y >= yEnd5; y -= solution)
+    {
+        pcl::PointXYZRGBL point;
+        point.y = y;
+        point.z = 0.0;
+        point.r = 0x00;
+        point.g = 0xff;
+        point.b = 0xf6;
+
+        for (float x = _dialog->boardWidth() * 0.5 - _dialog->a() + solution; x <= xEnd5; x += solution)
+        {
+            point.x = x;
+            _caliBoardCloud->push_back(point);
+        }
+    }
+
+//    emit this->foundPlane(_caliBoardCloud, pcl::PointXYZ(), pcl::PointXYZ(), std::vector<cv::Point3f>());
+    _mutex.unlock();
 }

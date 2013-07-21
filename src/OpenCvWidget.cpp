@@ -3,17 +3,23 @@
 #include <QImage>
 #include <QDebug>
 #include <QPainter>
+#include <QCoreApplication>
 
-#include "opencv2/core/core.hpp"
+OpenCvWidget::~OpenCvWidget(void)
+{
+    _mutex.lock();
+    delete _image;
+    _mutex.unlock();
+}
 
 void OpenCvWidget::setMat(const cv::Mat& mat)
 {
-    delete m_image;
-    cv::Mat tmp;
-    mat.copyTo(tmp);
+    _mutex.lock();
+    delete _image;
+    mat.copyTo(_mat);
 
     // 8-bits unsigned, NO. OF CHANNELS=1
-    if(mat.type() == CV_8UC1)
+    if(_mat.type() == CV_8UC1)
     {
         // Set the color table (used to translate colour indexes to qRgb values)
         QVector<QRgb> colorTable;
@@ -21,45 +27,65 @@ void OpenCvWidget::setMat(const cv::Mat& mat)
             colorTable.push_back(qRgb(i, i, i));
 
         // Copy input Mat
-        const uchar *qImageBuffer = static_cast<const uchar*>(tmp.data);
+        const unsigned char* qImageBuffer = static_cast<const unsigned char*>(_mat.data);
 
         // Create QImage with same dimensions as input Mat
-        m_image = new QImage(qImageBuffer, tmp.cols, tmp.rows, tmp.step, QImage::Format_Indexed8);
-        m_image->setColorTable(colorTable);
+        _image = new QImage(qImageBuffer, _mat.cols, _mat.rows, _mat.step, QImage::Format_Indexed8);
+        _image->setColorTable(colorTable);
     }
 
     // 8-bits unsigned, NO. OF CHANNELS=3
-    else if(mat.type() == CV_8UC3)
+    else if(_mat.type() == CV_8UC3)
     {
         // Copy input Mat
-        const uchar *qImageBuffer = static_cast<const uchar*>(tmp.data);
+        const unsigned char* qImageBuffer = static_cast<const unsigned char*>(_mat.data);
 
         // Create QImage with same dimensions as input Mat
-        QImage img(qImageBuffer, tmp.cols, tmp.rows, tmp.step, QImage::Format_RGB888);
-        m_image = new QImage(img.rgbSwapped());
+        QImage img(qImageBuffer, _mat.cols, _mat.rows, _mat.step, QImage::Format_RGB888);
+        _image = new QImage(img.rgbSwapped());
     }
 
     // 16-bits depth image
-    else if (mat.type() == CV_16UC1)
+    else if (_mat.type() == CV_16UC1)
     {
-        const uchar* qImageBuffer = static_cast<const uchar*>(tmp.data);
-        m_image = new QImage(qImageBuffer, tmp.cols, tmp.rows, tmp.step, QImage::Format_RGB16);
+        const unsigned char* qImageBuffer = static_cast<const unsigned char*>(_mat.data);
+        _image = new QImage(qImageBuffer, _mat.cols, _mat.rows, _mat.step, QImage::Format_RGB16);
     }
     else
     {
         qDebug() << "ERROR: Mat could not be converted to QImage.";
+        _mutex.unlock();
         return;
     }
 
-    this->setMinimumSize(m_image->size());
+    this->setMinimumSize(_image->size());
+    QObject* sender = this->sender();
+
+    // if this method is called from a other thread send just a event to queue.
+    if (sender && sender->thread() != this->thread())
+    {
+        QEvent event(QEvent::UpdateRequest);
+        QCoreApplication::sendEvent(this, &event);
+        _mutex.unlock();
+        return;
+    }
+
     this->update();
+    _mutex.unlock();
 }
 
 void OpenCvWidget::paintEvent(QPaintEvent*)
 {
-    if (!m_image)
+    _mutex.lock();
+
+    if (!_image)
+    {
+        _mutex.unlock();
         return;
+    }
 
     QPainter painter(this);
-    painter.drawImage(this->rect(), *m_image, m_image->rect());
+    painter.drawImage(this->rect(), *_image, _image->rect());
+
+    _mutex.unlock();
 }
