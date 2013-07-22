@@ -50,7 +50,7 @@ MainWidget::MainWidget(void)
     this->connect(_ui->_listPlanes, SIGNAL(currentRowChanged(int)), this, SLOT(selectPlane(int)));
     this->connect(&_dialog, SIGNAL(generateCalibrationBoard()), &_planeFinder, SLOT(generateCalibrationBoard()));
 
-//    _timer.start(40);
+    _timer.start(40);
 }
 
 MainWidget::~MainWidget(void)
