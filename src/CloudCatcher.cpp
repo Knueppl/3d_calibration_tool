@@ -1,5 +1,10 @@
 #include "CloudCatcher.h"
+
+#ifdef ___USE_KINECT___
+#include "KinectSensor.h"
+#else
 #include "OpenNiSensor.h"
+#endif
 
 #include <QDebug>
 
@@ -13,7 +18,11 @@ CloudCatcher::CloudCatcher(QObject* parent)
       _coords(0),
       _z(0),
       _image(0),
+#ifdef ___USE_KINECT___
+      _sensor(new KinectSensor("kinect.xml"))
+#else
       _sensor(new OpenNiSensor)
+#endif
 {
     this->start();
 }

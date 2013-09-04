@@ -13,7 +13,11 @@
 
 #include <opencv2/opencv.hpp>
 
+#ifdef ___USE_KINECT___
+class KinectSensor;
+#else
 class OpenNiSensor;
+#endif
 
 class CloudCatcher : public QThread
 {
@@ -47,7 +51,13 @@ private:
     const std::vector<cv::Point3f>* _coords;
     const cv::Mat* _z;
     const cv::Mat* _image;
+
+#ifdef ___USE_KINECT___
+    KinectSensor* _sensor;
+#else
     OpenNiSensor* _sensor;
+#endif
+
     float _minDistance;
     float _maxDistance;
 };

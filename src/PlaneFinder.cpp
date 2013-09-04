@@ -126,7 +126,7 @@ void PlaneFinder::search(void)
     Eigen::Matrix4f T;
 
     for (int i = 0; i < 3; i++)
-        T.row(i) = Eigen::Vector4f(eigenvectors.row(i)[0], eigenvectors.row(i)[1], eigenvectors.row(i)[2], mean[i]);
+        T.row(i) = Eigen::Vector4f(eigenvectors.col(i)[0], eigenvectors.col(i)[1], eigenvectors.col(i)[2], mean[i]);
 
     T(3, 3) = 1.0;
 
@@ -158,6 +158,9 @@ void PlaneFinder::search(void)
     std::vector<cv::Point3f> points;
     emit this->foundAxis(start, end);
     this->computePoints(mean, eigenvectors, points);
+    std::cout << "Mean: " << mean << std::endl;
+    std::cout << "Points: " << std::endl << points << std::endl;
+    std::cout << "T: " << std::endl << T << std::endl;
     emit this->foundPlane(_planeCloud, start, end, points);
 }
 
@@ -189,28 +192,22 @@ void PlaneFinder::computePoints(const Eigen::Vector3f& mean, const Eigen::Matrix
 {
     const Eigen::Vector3f x(eigenvectors.col(0));
     const Eigen::Vector3f y(eigenvectors.col(1));
-    const Eigen::Vector3f dx(x * _dialog->spaceHor());
-    const Eigen::Vector3f dy(y * _dialog->spaceVer());
-    const Eigen::Vector3f topLeft(mean + x * (-(_dialog->boardWidth() - 2.0 * _dialog->borderLeft()) * 0.5)
-                                  + y * (-(_dialog->boardHeight() - 2.0 * _dialog->borderTop()) * 0.5));
-
-//    std::cout << "Found points:" << std::endl;
-
+    const Eigen::Vector3f dx(x * -_dialog->spaceHor());
+    const Eigen::Vector3f dy(y * -_dialog->spaceVer());
+    const Eigen::Vector3f topLeft(mean + x * ((_dialog->boardWidth() - 2.0 * _dialog->borderLeft()) * 0.5)
+                                  + y * ((_dialog->boardHeight() - 2.0 * _dialog->borderTop()) * 0.5));
+    std::cout << "top left: " << topLeft << std::endl;
     for (int row = 0; row < _dialog->pointsVer(); ++row)
     {
-        const Eigen::Vector3f point(topLeft - row * dy);
+        const Eigen::Vector3f point(topLeft + row * dy);
 
         for (int col = 0; col < _dialog->pointsHor(); ++col)
         {
             Eigen::Vector3f tmpEigen(point + col * dx);
             cv::Point3f tmpCv(tmpEigen[0], tmpEigen[1], tmpEigen[2]);
             points.push_back(tmpCv);
-//            std::cout << points.back() << ", ";
         }
-//        std::cout << std::endl;
     }
-
-//    std::cout << std::endl;
 }
 
 void PlaneFinder::generateCalibrationBoard(void)
