@@ -5,6 +5,8 @@
 #include <algorithm>
 
 #include <QDebug>
+#include <QFileDialog>
+#include <QTextStream>
 
 #include <pcl/filters/extract_indices.h>
 #include <pcl/filters/passthrough.h>
@@ -30,6 +32,8 @@ MainWidget::MainWidget(void)
 
     QMenuBar* menuBar = this->menuBar();
     menuBar->addAction("Config Dialog", &_dialog, SLOT(show()));
+    menuBar->addAction("Calibration", this, SLOT(calibrate()));
+    menuBar->addAction("Load Intrinsic", this, SLOT(loadIntrinsic()));
 
     this->connect(&_timer, SIGNAL(timeout()), this, SLOT(tick()));
     this->connect(&_cloudCatcher, SIGNAL(cloud(pcl::PointCloud<pcl::PointXYZRGBL>::ConstPtr)),
@@ -43,7 +47,6 @@ MainWidget::MainWidget(void)
 
     this->connect(_ui->_buttonStartStop, SIGNAL(clicked()), this, SLOT(startStop()));
     _ui->_buttonStartStop->setText("Start");
-    this->connect(_ui->_buttonCali, SIGNAL(clicked()), this, SLOT(calibrate()));
     this->connect(_ui->_buttonAccept, SIGNAL(clicked()), this, SLOT(acceptPlane()));
     this->connect(_ui->_buttonDisclaim, SIGNAL(clicked()), this, SLOT(disclaimPlane()));
 
@@ -257,13 +260,13 @@ void MainWidget::calibrate(void)
     if (!_valid.size())
         return;
 
-    std::vector<std::vector<cv::Point3f> > corners(1);
-    const float dh = (_dialog.boardWidth() - 2 * _dialog.borderLeft()) / _dialog.pointsVer();
-    const float dv = (_dialog.boardHeight() - 2 * _dialog.borderTop()) / _dialog.pointsHor();
+//    std::vector<std::vector<cv::Point3f> > corners(1);
+//    const float dh = (_dialog.boardWidth() - 2 * _dialog.borderLeft()) / _dialog.pointsVer();
+//    const float dv = (_dialog.boardHeight() - 2 * _dialog.borderTop()) / _dialog.pointsHor();
 
-    for (int v = 0; v < _dialog.pointsVer(); v++)
-        for (int h = 0; h < _dialog.pointsHor(); h++)
-            corners[0].push_back(cv::Point3f(static_cast<float>(v) * dv, static_cast<float>(h) * dh, 0.0));
+//    for (int v = 0; v < _dialog.pointsVer(); v++)
+//        for (int h = 0; h < _dialog.pointsHor(); h++)
+//            corners[0].push_back(cv::Point3f(static_cast<float>(v) * dv, static_cast<float>(h) * dh, 0.0));
 
     std::vector<std::vector<cv::Point2f> > points;
     std::vector<pcl::PointCloud<pcl::PointXYZRGBL>::Ptr> planes;
@@ -287,20 +290,20 @@ void MainWidget::calibrate(void)
         return;
     }
 
-    corners.resize(points.size(), corners[0]);
-    cv::Mat intrinsic(3, 3, CV_64F);
-    cv::Mat distortion(1, 8, CV_64F);
-    std::vector<cv::Mat> rvecs, tvecs;
+//    corners.resize(points.size(), corners[0]);
+//    std::vector<cv::Mat> rvecs, tvecs;
 
     qDebug() << "points size = " << points.size();
-
-    qDebug() << "rms error intrinsic: " << cv::calibrateCamera(corners, points, _thermalImages[0]->size(), intrinsic,
-                                                               distortion, rvecs, tvecs);
 
     std::cout << "object points: " << std::endl << planePoints << std::endl;
 
     cv::Mat r, t;
-    cv::solvePnP(planePoints, imagePoints, intrinsic, distortion, r, t);
+    cv::solvePnP(planePoints, imagePoints, _intrinsic, _distortion, r, t);
+
+    std::cout << "r:" << std::endl << r << std::endl;
+    std::cout << "t:" << std::endl << t << std::endl;
+
+    cv::solvePnPRansac(planePoints, imagePoints, _intrinsic, _distortion, r, t);
 
     std::cout << "r:" << std::endl << r << std::endl;
     std::cout << "t:" << std::endl << t << std::endl;
@@ -316,5 +319,71 @@ void MainWidget::printCvMat(const cv::Mat& mat) const
         }
 
         std::cout << std::endl;
+    }
+}
+
+namespace {
+const char* TEXT_LABEL_RESULT = "Intrinsic Matrix:\n"
+                                "----------------------------\n";
+}
+
+void MainWidget::loadIntrinsic(void)
+{
+    QString fileName(QFileDialog::getOpenFileName(this, "Select a xml file containing intrinsic camera calibration",
+                                                  ".", "*.xml"));
+
+    if (fileName.isEmpty())
+        return;
+
+    cv::FileStorage fs(fileName.toUtf8().data(), cv::FileStorage::READ);
+
+    fs["intrinsic"] >> _intrinsic;
+    fs["distortion"] >> _distortion;
+
+
+    /* print intrinsic stuff */
+    QString out(TEXT_LABEL_RESULT);
+    QTextStream stream(&out);
+    stream.setRealNumberPrecision(3);
+    stream.setRealNumberNotation(QTextStream::FixedNotation);
+
+    stream << "intrinsic:\n";
+    this->cvMatToQString(out, _intrinsic);
+    stream << "\n";
+
+    stream << "distortion:\n";
+    this->cvMatToQString(out, _distortion);
+
+    _ui->_labelIntrinsic->setText(out);
+}
+
+void MainWidget::cvMatToQString(QString& string, const cv::Mat& mat)
+{
+    QTextStream stream(&string);
+    stream.setFieldAlignment(QTextStream::AlignRight);
+    stream.setRealNumberPrecision(3);
+    stream.setRealNumberNotation(QTextStream::FixedNotation);
+
+    for (int row = 0; row < mat.rows; row++)
+    {
+        for (int col = 0; col < mat.cols; col++)
+        {
+            stream.setFieldWidth(8);
+
+            switch (mat.type())
+            {
+            case CV_64F:
+                stream << mat.at<double>(row, col);
+                break;
+
+            default:
+                break;
+            }
+
+            stream.setFieldWidth(0);
+            stream << " ";
+        }
+
+        stream << "\n";
     }
 }

@@ -38,6 +38,7 @@ private slots:
     void acceptPlane(void);
     void disclaimPlane(void);
     void calibrate(void);
+    void loadIntrinsic(void);
 
 private:
 
@@ -51,6 +52,7 @@ private:
                        std::vector<pcl::PointIndices>& clusters);
     void findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image);
     void printCvMat(const cv::Mat& mat) const;
+    void cvMatToQString(QString& string, const cv::Mat& mat);
 
     Ui::MainWidget* _ui;
     ConfigDialog _dialog;
@@ -65,6 +67,8 @@ private:
     QVector<cv::Mat*> _thermalImages;
     QVector<bool> _valid;
     QVector<std::vector<cv::Point3f> > _planePoints;
+    cv::Mat _intrinsic;
+    cv::Mat _distortion;
 
     State _state;
     QTimer _timer;
